@@ -21,31 +21,60 @@ Rectangle {
 		onClicked: {
 			mainPage.state = ' '
 			downloadHumble.go(inputUser.text, inputPassword.text)
-			console.log(inputUser.text, inputPassword.text)
 
 		}
 	}
 
- TextInput {
-	 id: inputUser
-	 x: 110
-	 y: 53
-	 width: 80
-	 height: 20
-	 text: qsTr("Text")
-  anchors.horizontalCenter: parent.horizontalCenter
+ Rectangle {
+	 id: rectangle2
+	 x: 71
+	 y: 37
+	 width: 159
+	 height: 22
+	 color: "#ffffff"
+
+	 TextInput {
+		 id: inputUser
+		 text: downloadHumble.getUsername()
+   anchors.fill: parent
+		 font.pixelSize: 12
+	 }
+ }
+
+ Rectangle {
+	 id: rectangle3
+	 x: 71
+	 y: 72
+	 width: 159
+	 height: 23
+	 color: "#ffffff"
+
+	 TextInput {
+		 id: inputPassword
+		 text: downloadHumble.getPassword()
+   anchors.fill: parent
+		 echoMode: TextInput.Password
+		 font.pixelSize: 12
+	 }
+ }
+
+ Text {
+	 id: text1
+	 x: 37
+	 y: 40
+	 text: qsTr("Email:")
+	 font.bold: true
+	 horizontalAlignment: Text.AlignRight
 	 font.pixelSize: 12
  }
 
- TextInput {
-	 id: inputPassword
-	 x: 110
-	 y: 85
-	 width: 80
-	 height: 20
-	 text: qsTr("Text")
-  anchors.horizontalCenter: parent.horizontalCenter
-	 echoMode: TextInput.Password
+ Text {
+	 id: text2
+	 x: 14
+	 y: 75
+	 text: qsTr("Password")
+	 font.bold: true
+	 horizontalAlignment: Text.AlignRight
 	 font.pixelSize: 12
  }
 }

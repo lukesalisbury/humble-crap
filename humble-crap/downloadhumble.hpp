@@ -17,6 +17,8 @@ class DownloadHumble : public QObject
 		Q_INVOKABLE void saveFile( QString content, QString as );
 		Q_INVOKABLE void downloadTorrent(QString urlString);
 		Q_INVOKABLE void get(QString url, QString saveAs);
+		Q_INVOKABLE QString getUsername();
+		Q_INVOKABLE QString getPassword();
 	signals:
 		void downloaded();
 		void downloadError();
@@ -28,6 +30,7 @@ class DownloadHumble : public QObject
 		QNetworkAccessManager m_WebCtrl;
 		QByteArray m_DownloadedData;
 		bool downloading;
+		QSettings settings;
 
 };
 

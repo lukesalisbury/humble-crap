@@ -6,13 +6,32 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QtWidgets/QMessageBox>
+#include <QSettings>
 
-DownloadHumble::DownloadHumble(QObject *parent) :	QObject(parent)
+
+DownloadHumble::DownloadHumble(QObject *parent) :	QObject(parent), settings("HumbleCrap", "HumbleCrap")
 {
 
-connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(fileDownloaded(QNetworkReply*)));
+
+	connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(fileDownloaded(QNetworkReply*)));
 	connect(&m_WebCtrl, SIGNAL(sslErrors(QNetworkReply*, QList<QSslError>)), SLOT(sslError(QNetworkReply*, QList<QSslError>)));
 	downloading = false;
+
+
+
+}
+
+
+QString DownloadHumble::getUsername()
+{
+
+	return settings.value("username").toString();
+}
+
+QString DownloadHumble::getPassword()
+{
+
+	return settings.value("password").toString();
 }
 
 QString DownloadHumble::getDownloadText()
@@ -40,37 +59,9 @@ void DownloadHumble::go(QString email, QString password)
 	if ( downloading )
 		return;
 	QNetworkRequest request;
-/*
- *
-	var login = false;
-	var xhr = new XMLHttpRequest()
-	var xhr2 = new XMLHttpRequest()
-	var postData = "account-login-username=lukex@operamail.com&account-login-password=&goto=/home&qs=";
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState == XMLHttpRequest.DONE) {
-			//xhr.setRequestHeader("Cookie",
-			//xhr2.send(null)
 
-			console.log("cookie", xhr.getResponseHeader("Set-Cookie"), "Set-Cookie2", xhr.getResponseHeader("Set-Cookie2") )
-			console.log("file request", xhr.statusText, xhr.status )
-		}
-	}
-	xhr2.onreadystatechange = function () {
-		console.log("readyState", xhr2.readyState )
-		if (xhr2.readyState == XMLHttpRequest.DONE) {
-			console.log("file request", xhr.status, xhr.responseText )
-				xmlModel.setXML(xhr.responseText)
-
-		}
-	}
-
-	xhr2.open('GET', "https://www.humblebundle.com/home", true)
-
-
-	xhr.open('POST', "https://www.humblebundle.com/login?goto=/home&qs=", true)
-	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-	xhr.send(postData)
-			*/
+	settings.setValue("username", email);
+	settings.setValue("password", password);
 
 	if ( QSslSocket::supportsSsl() )
 	{
@@ -82,19 +73,18 @@ void DownloadHumble::go(QString email, QString password)
 		request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 		request.setRawHeader("Accept-Encoding", "gzip,deflate,qcompress" );
 
-		email = "lukex@email";
-		password = "hbpassword";
-
 		postData.append("goto").append("=").append("/home").append("&");
 		postData.append("qs").append("=").append("").append("&");
-		postData.append("account-login-username").append("=").append(email).append("&");
-		postData.append("account-login-password").append("=").append(email);
+		postData.append("username").append("=").append(email).append("&");
+		postData.append("password").append("=").append(password);
 
 
 		qDebug() << "Downloading www.humblebundle.com/home";
 		qDebug() << "URL: " << request.url();
-		qDebug() << "Email: " << postData.toPercentEncoding("=&/");
-		qDebug() << "password: " << postData;
+		qDebug() << "postData1: " << postData.toPercentEncoding("=&");
+		qDebug() << "postData2: " << postData;
+
+
 
 		downloading = true;
 
