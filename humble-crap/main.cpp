@@ -17,8 +17,11 @@ int main(int argc, char *argv[])
 
 
 	QtQuick2ApplicationViewer viewer;
+
+
 	viewer.rootContext()->setContextProperty("downloadHumble", &t);
-	viewer.setMainQmlFile(QStringLiteral("qml/humble-crap/main.qml"));
+    viewer.setTitle("Humble Crap");
+    viewer.setMainQmlFile(QStringLiteral("qml/humble-crap/MainWindow.qml"));
 	viewer.showExpanded();
 
 

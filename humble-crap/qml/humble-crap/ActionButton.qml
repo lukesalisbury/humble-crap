@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 Item {
 	id: container
-	property string text: "Download"
+    property string text: "ACTION"
 	property string url: ""
 	property string colour: "#33aa2a"
 
@@ -15,10 +15,10 @@ Item {
 	width: 64
 	height: 20
 
-	function go()
-	{
-		console.log("download", url);
-	}
+    function go()
+    {
+        console.log("download", url);
+    }
 
 	Rectangle {
 		id: rectangle1
@@ -27,12 +27,12 @@ Item {
 		gradient: Gradient {
 			GradientStop {
 				position: 0
-				color: "#33aa2a"
+                color: container.colour
 			}
 
 			GradientStop {
 				position: 1
-				color: "#467a3c"
+                color:  Qt.darker(container.colour, 2.4)
 			}
 		}
 		border.color: "#000000"
@@ -59,7 +59,8 @@ Item {
 			anchors.topMargin: 0
 			hoverEnabled: true
 			anchors.fill: parent
-			onClicked: container.go()
+            onClicked: container.clicked()
+
 		}
 	}
 }

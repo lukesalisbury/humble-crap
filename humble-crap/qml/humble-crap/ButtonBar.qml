@@ -1,11 +1,12 @@
 import QtQuick 2.0
 
 Rectangle {
+
 	color: "#104b9e"
-	Button {
-		id: buttonDownload
+    ActionButton {
+        id: buttonRefresh
 		width: 91
-		text: qsTr("Download")
+        text: qsTr("Refresh")
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 10
 		anchors.top: parent.top
@@ -13,13 +14,11 @@ Rectangle {
 		anchors.left: parent.left
 		anchors.leftMargin: 10
 		onClicked: {
-			mainPage.state = 'logon'
-
-			//downloadHumble.go()
+            pageMainWindow.refresh()
 		}
 	}
 
-	Button {
+    ActionButton {
 		id: buttonQuit
 		x: 300
 		onClicked: Qt.quit()
@@ -30,5 +29,6 @@ Rectangle {
 		anchors.bottomMargin: 10
 		anchors.right: parent.right
 		anchors.rightMargin: 10
+
 	}
 }

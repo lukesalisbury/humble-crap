@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.XmlListModel 2.0
 import QtQuick.LocalStorage 2.0
+import QtQuick.Dialogs 1.0
 
 XmlListModel {
 	property string database: "HumbleBundleItems"
@@ -63,13 +64,13 @@ XmlListModel {
 	}
 
 	onStatusChanged: {
-		if (xmlModel.status == 1)
+        if (xmlModel.status !== 1)
 		{
 			console.log("Status: " + xmlModel.status)
 			console.log("Count: " + xmlModel.count)
 		}
 
-		if (xmlModel.status == 3)
+        if (xmlModel.status !== 3)
 		{
 			console.log("Error: " + xmlModel.errorString() )
 		}
@@ -85,12 +86,14 @@ XmlListModel {
 
 	function retrieveInfo(databaseID, subtitle) {
 		var db = createAndOpenDB()
-		var object = db.readTransaction(function (tx) {
+        var object
+        db.readTransaction(function (tx) {
 			var results = tx.executeSql(
 						'SELECT * FROM LISTINGS WHERE `id` = "' + databaseID + '"')
-			console.log(results.rows.item(0).salutation)
+            object = results.rows.item(0);
 		})
-		//console.log(object)
+        return object;
+
 	}
 
 	function insertInfo(databaseID, displayName) {
@@ -104,6 +107,38 @@ XmlListModel {
 			//console.log("esults.rowsAffected", results.rowsAffected)
 		})
 	}
+
+	function startTorrent( databaseID, torrentFile )
+	{
+		var db = createAndOpenDB()
+
+		db.transaction(function (tx) {
+			tx.executeSql('UPDATE LISTINGS SET installed = ?, installPath = ?, executePath = ? WHERE id = ?',
+						  [1, 'G:\\Steam\\steamapps\\common\\alan wake\\', 'G:\\Steam\\steamapps\\common\\alan wake\\AlanWake.exe', databaseID])
+
+		})
+
+		downloadHumble.openFile(torrentFile)
+	}
+
+	function selectPackage( databaseID, torrentFile )
+	{
+		var db = createAndOpenDB()
+
+		Qt.createComponent("StartUpDialog.qml").createObject(pageMainWindow, {});
+		
+		
+
+
+		db.transaction(function (tx) {
+			tx.executeSql('UPDATE LISTINGS SET installed = ?, installPath = ?, executePath = ? WHERE id = ?',
+						  [1, 'G:\\Steam\\steamapps\\common\\alan wake\\', 'G:\\Steam\\steamapps\\common\\alan wake\\AlanWake.exe', databaseID])
+
+		})
+
+		downloadHumble.openFile(torrentFile)
+	}
+
 
 	function installed(databaseID, path, executable) {
 		var db = createAndOpenDB()

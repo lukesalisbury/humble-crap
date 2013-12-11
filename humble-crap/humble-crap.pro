@@ -15,7 +15,9 @@ QML_IMPORT_PATH =
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
-	downloadhumble.cpp
+	downloadhumble.cpp \
+    packageplugin.cpp \
+    packagehandling.cpp
 
 # Installation path
 # target.path =
@@ -26,7 +28,11 @@ qtcAddDeployment()
 
 OTHER_FILES += \
 	qml/humble-qrap/Button.qml \
-    qml/humble-crap/GameListItem.qml
+    qml/humble-crap/GameListItem.qml \
+    qml/humble-crap/StartUpDialog.qml \
+    qml/humble-crap/main.qml
 
 HEADERS += \
-	downloadhumble.hpp
+	downloadhumble.hpp \
+    packageplugin.hpp \
+    packagehandling.hpp

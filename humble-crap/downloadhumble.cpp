@@ -11,169 +11,318 @@
 
 DownloadHumble::DownloadHumble(QObject *parent) :	QObject(parent), settings("HumbleCrap", "HumbleCrap")
 {
-
-
-	connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(fileDownloaded(QNetworkReply*)));
-	connect(&m_WebCtrl, SIGNAL(sslErrors(QNetworkReply*, QList<QSslError>)), SLOT(sslError(QNetworkReply*, QList<QSslError>)));
-	downloading = false;
-
-
+    this->loginSuccess = false;
+	this->crapHeader = "CrapIdent";
+    connect(&webManager, SIGNAL(sslErrors(QNetworkReply*, QList<QSslError>)), SLOT(sslError(QNetworkReply*, QList<QSslError>)));
 
 }
 
 
+QString DownloadHumble::getErrorMessage()
+{
+    return errorMessage;
+}
+
 QString DownloadHumble::getUsername()
 {
-
 	return settings.value("username").toString();
 }
 
 QString DownloadHumble::getPassword()
 {
-
 	return settings.value("password").toString();
 }
 
-QString DownloadHumble::getDownloadText()
+bool DownloadHumble::getSavePassword()
 {
-	QString string = QString( m_DownloadedData.data() );
+    return !!settings.value("password").toString().length();
+}
 
-	qDebug() << "m_DownloadedData.data()" << m_DownloadedData.data();
 
-	return string;
+
+void DownloadHumble::login(QString email, QString password, bool savePassword)
+{
+    QNetworkRequest request;
+
+    /* Log User and Password */
+    currentPassword = password;
+    currentUser = email;
+
+    settings.setValue("username", email);
+    if ( savePassword )
+        settings.setValue("password", password);
+    else
+        settings.setValue("password", "");
+
+
+    /* Make requests */
+    connect(&webManager, SIGNAL(finished(QNetworkReply*)), SLOT(finishLogin(QNetworkReply*)));
+
+    if ( QSslSocket::supportsSsl() )
+    {
+        QByteArray postData;
+        request.setUrl(QUrl("https://www.humblebundle.com/login?goto=/home&qs="));
+        request.setRawHeader("User-Agent", "Humble-bundle Content Retrieving APplication");
+        request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.setRawHeader("Accept-Encoding", "gzip,deflate,qcompress" );
+
+        postData.append("goto").append("=").append("/home").append("&");
+        postData.append("qs").append("=").append("").append("&");
+        postData.append("username").append("=").append(currentUser).append("&");
+        postData.append("password").append("=").append(currentPassword);
+
+
+        qDebug() << "Downloading www.humblebundle.com/home";
+        qDebug() << "URL: " << request.url();
+
+        webManager.post(request, postData.toPercentEncoding("=&") );
+    }
+    else
+    {
+        qDebug() << "OpenSSL not installed";
+        this->errorMessage = "OpenSSL not installed";
+        emit appError();
+    }
+
+}
+
+/* File Handling */
+void DownloadHumble::saveFile(QByteArray content, QString as)
+{
+	QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
+
+	qDebug() << as << "QByteArray" ;
+
+	QFile f(path + "/" + as);
+	f.open( QIODevice::WriteOnly|QIODevice::Truncate );
+	f.write( content );
+
+	f.close();
+
+
 }
 
 void DownloadHumble::saveFile(QString content, QString as)
 {
-	std::string file = "../" + as.toStdString();
-	std::ofstream s;
-	s.open( file.c_str() );
-	s << content.toStdString() << std::endl;
-	s.close();
+	QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
+
+	qDebug() << as << "QString";
+
+	QFile f(path + "/" + as);
+	f.open( QIODevice::WriteOnly|QIODevice::Truncate );
+
+	f.write( content.toUtf8() );
+	f.close();
+
 
 }
 
-
-void DownloadHumble::go(QString email, QString password)
+void DownloadHumble::getFile(QString id, QString url )
 {
-	if ( downloading )
-		return;
-	QNetworkRequest request;
+    QNetworkRequest request;
+	QNetworkReply * reply;
+	connect(&webManager, SIGNAL(finished(QNetworkReply*)), SLOT(finishDownload(QNetworkReply*)));
 
-	settings.setValue("username", email);
-	settings.setValue("password", password);
-
-	if ( QSslSocket::supportsSsl() )
-	{
-		//goto=%2Fhome&qs=&username=lukex%40email&password=
-		//wget -S --post-data='goto=/home&qs=&account-login-username=lukex@e&account-login-password=' https://www.humblebundle.com/login?goto=/home&qs=mail
-		QByteArray postData;
-		request.setUrl(QUrl("https://www.humblebundle.com/login?goto=/home&qs="));
-		request.setRawHeader("User-Agent", "Humble-bundle Content Retrieving APplication");
-		request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
-		request.setRawHeader("Accept-Encoding", "gzip,deflate,qcompress" );
-
-		postData.append("goto").append("=").append("/home").append("&");
-		postData.append("qs").append("=").append("").append("&");
-		postData.append("username").append("=").append(email).append("&");
-		postData.append("password").append("=").append(password);
-
-
-		qDebug() << "Downloading www.humblebundle.com/home";
-		qDebug() << "URL: " << request.url();
-		qDebug() << "postData1: " << postData.toPercentEncoding("=&");
-		qDebug() << "postData2: " << postData;
-
-
-
-		downloading = true;
-
-		m_WebCtrl.post(request, postData.toPercentEncoding("=&") );
-	}
-	else
-	{
-		qDebug() << "OpenSSL not installed";
-	}
-}
-
-void DownloadHumble::get(QString url, QString saveAs)
-{
-	if ( downloading )
-		return;
-	QNetworkRequest request;
-
-	if ( QSslSocket::supportsSsl() )
-	{
-		request.setUrl(QUrl(url));
+    if ( QSslSocket::supportsSsl() )
+    {
+		//request.setUrl(QUrl(url));
+		request.setUrl(QUrl("http://mokoi.info/images/index/os_windows.png"));
 		request.setRawHeader("User-Agent", "Humble-bundle Content Retrieving APplication");
 
+        qDebug() << "Downloading ";
+        qDebug() << "URL: " << request.url();
 
-		qDebug() << "Downloading ";
-		qDebug() << "URL: " << request.url();
-		qDebug() << "As: " << saveAs;
 
-		downloading = true;
+		reply = webManager.get(request);
 
-		m_WebCtrl.get(request);
+		reply->setProperty("crap", id );
 
-	}
-	else
-	{
-		qDebug() << "OpenSSL not installed";
-	}
+		currentDownloads.append(reply);
+
+    }
+    else
+    {
+        qDebug() << "OpenSSL not installed";
+        this->errorMessage = "OpenSSL not installed";
+        emit appError();
+    }
+}
+
+void DownloadHumble::openFile( QString file )
+{
+	QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
+	QUrl file_path = QUrl(path + "/" + file );
+	QDesktopServices::openUrl(file_path);
 }
 
 
+
+QString DownloadHumble::getContent()
+{
+
+    QFile f("/home/luke/humble.txt");
+    f.open(QIODevice::ReadOnly );
+
+    QTextStream in(&f);
+    QString string = in.readAll();
+
+
+    f.close();
+
+    return string;
+    /*
+    QString string = QString( pageContent.data() );
+
+    qDebug() << "downloadData.data()" << pageContent.data();
+
+    return string;
+    */
+}
+
+
+void DownloadHumble::updateContent()
+{
+    QNetworkRequest request;
+
+    connect(&webManager, SIGNAL(finished(QNetworkReply*)), SLOT(finishContent(QNetworkReply*)));
+
+    if ( QSslSocket::supportsSsl() )
+    {
+        QByteArray postData;
+        request.setUrl(QUrl("https://www.humblebundle.com/home"));
+        request.setRawHeader("User-Agent", "Humble-bundle Content Retrieving APplication");
+        request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.setRawHeader("Accept-Encoding", "gzip,deflate,qcompress" );
+
+
+        qDebug() << "Downloading www.humblebundle.com/home";
+        qDebug() << "URL: " << request.url();
+
+        webManager.get( request );
+    }
+    else
+    {
+        qDebug() << "OpenSSL not installed";
+        this->errorMessage = "OpenSSL not installed";
+        emit appError();
+    }
+}
 
 void DownloadHumble::sslError(QNetworkReply* pReply, const QList<QSslError> & errors )
 {
-	emit downloadError();
+    this->errorMessage = "SSL Error";
+    emit appError();
 }
 
-void DownloadHumble::fileDownloaded(QNetworkReply* pReply)
+void DownloadHumble::finishDownload(QNetworkReply* pReply)
 {
-	downloading = false;
-	QVariant redirectionTarget = pReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+	currentDownloads.removeAll(pReply);
+	disconnect(&webManager, SIGNAL(finished(QNetworkReply*)), 0, 0);
+
+	pReply->deleteLater();
+
 	if ( pReply->error() )
 	{
 		qDebug() << tr("Download failed: %1.").arg(pReply->errorString());
-		return;
-	}
-	else if (!redirectionTarget.isNull())
-	{
-
-		qDebug() << "redirectionTarget" << redirectionTarget.toString();
-		pReply->deleteLater();
-		//this->get("https://www.humblebundle.com/home", "");
+		errorMessage = pReply->errorString();
+		emit appError();
 		return;
 	}
 
 
-	pReply->deleteLater();
-	m_DownloadedData = pReply->readAll();
-	emit downloaded();
+
+
+	// Save Content
+	QVariant id = pReply->property( "crap" );
+	QString path = pReply->url().path();
+	QString basename = QFileInfo(path).fileName();
+
+	if (basename.isEmpty())
+		basename = "download";
+
+	this->saveFile(pReply->readAll(), basename);
+
+	qDebug() << "Saved to" << basename << id.toString();
+	emit downloaded( id.toString(), basename);
+
+
 
 
 }
 
-void DownloadHumble::downloadTorrent(QString urlString)
+
+void DownloadHumble::finishLogin( QNetworkReply* pReply )
 {
-	if ( QSslSocket::supportsSsl() )
-	{
-		QNetworkRequest request;
-		QUrl url = QUrl(urlString);
+    QVariant redirectionTarget = pReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+    QUrl url = QUrl(redirectionTarget.toString());
 
-		request.setUrl(url);
-		request.setRawHeader("User-Agent", "Humble-bundle Content Retrieving APplication");
+    qDebug() << url;
 
-		qDebug() << "Downloading torrent ";
-		qDebug() << "URL: " << request.url();
+    disconnect(&webManager, SIGNAL(finished(QNetworkReply*)), 0, 0);
 
-		m_WebCtrl.get(request);
-	}
-	else
-	{
-		qDebug() << "OpenSSL not installed";
-	}
+    pReply->deleteLater();
+
+    if ( pReply->error() )
+    {
+        qDebug() << tr("Download failed: %1.").arg(pReply->errorString());
+        this->errorMessage = pReply->errorString();
+        emit appError();
+        return;
+    }
+    else if ( url.path() == "/login" )
+    {
+        qDebug() << tr("Login failed") << url.query();
+        this->errorMessage = "Login failed";
+        emit appError();
+        return;
+    }
+    else if ( url.path() == "/home" )
+    {
+        emit appSuccess();
+    }
+
+
+
+
+    pageContent = pReply->readAll();
+    emit appSuccess();
+
+
+}
+
+
+void DownloadHumble::finishContent( QNetworkReply* pReply )
+{
+    QVariant redirectionTarget = pReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+    QUrl url = QUrl(redirectionTarget.toString());
+
+    qDebug() << url;
+
+    disconnect(&webManager, SIGNAL(finished(QNetworkReply*)), 0, 0);
+
+    pReply->deleteLater();
+
+    if ( pReply->error() )
+    {
+        qDebug() << tr("Download failed: %1.").arg(pReply->errorString());
+        this->errorMessage = pReply->errorString();
+        emit appError();
+
+    }
+    else if ( url.path() == "/login" )
+    {
+        qDebug() << tr("Login failed") << url.query();
+        this->errorMessage = "Login failed";
+        emit appError();
+
+    }
+    else if ( url.path() == "/home" )
+    {
+        pageContent = pReply->readAll();
+        emit appSuccess();
+    }
+
+
+
 }
 

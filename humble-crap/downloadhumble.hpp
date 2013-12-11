@@ -12,26 +12,48 @@ class DownloadHumble : public QObject
 	Q_OBJECT
 	public:
 		explicit DownloadHumble(QObject *parent = 0);
-		Q_INVOKABLE void go( QString email, QString password );
-		Q_INVOKABLE QString getDownloadText();
+        Q_INVOKABLE void login(QString email, QString password , bool savePassword);
+
+        Q_INVOKABLE void updateContent();
+        Q_INVOKABLE QString getContent();
+
+		Q_INVOKABLE void saveFile( QByteArray  content, QString as );
 		Q_INVOKABLE void saveFile( QString content, QString as );
-		Q_INVOKABLE void downloadTorrent(QString urlString);
-		Q_INVOKABLE void get(QString url, QString saveAs);
+		Q_INVOKABLE void getFile(QString id, QString url);
+		Q_INVOKABLE void openFile( QString file );
+
 		Q_INVOKABLE QString getUsername();
 		Q_INVOKABLE QString getPassword();
+        Q_INVOKABLE bool getSavePassword();
+        Q_INVOKABLE QString getErrorMessage();
 	signals:
-		void downloaded();
+		void refresh();
+		void downloaded(QString id, QString file);
 		void downloadError();
+        void appError();
+        void appSuccess();
 
 	public slots:
-		void fileDownloaded(QNetworkReply* pReply);
-		void sslError(QNetworkReply* pReply, const QList<QSslError> & errors );
-	private:
-		QNetworkAccessManager m_WebCtrl;
-		QByteArray m_DownloadedData;
-		bool downloading;
-		QSettings settings;
+        void finishDownload( QNetworkReply* pReply );
+        void finishLogin( QNetworkReply* pReply );
+        void finishContent( QNetworkReply* pReply );
 
+		void sslError(QNetworkReply* pReply, const QList<QSslError> & errors );
+    protected:
+        QString currentPassword;
+        QString currentUser;
+        QByteArray pageContent;
+
+    private:
+		QList<QNetworkReply *> currentDownloads;
+
+        QNetworkAccessManager webManager;
+        QByteArray downloadData;
+        bool fileDownloading;
+        bool loginSuccess;
+		QSettings settings;
+        QString errorMessage;
+		QByteArray crapHeader;
 };
 
 #endif // DOWNLOADHUMBLE_HPP
