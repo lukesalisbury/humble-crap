@@ -108,6 +108,17 @@ XmlListModel {
 		})
 	}
 
+	function setMode(databaseID, mode) {
+
+		var db = createAndOpenDB()
+		var object = db.transaction(function (tx) {
+			tx.executeSql('UPDATE LISTINGS SET installed = ? WHERE id = ?',
+						  [mode, databaseID])
+
+		})
+	}
+
+
 	function startTorrent( databaseID, torrentFile )
 	{
 		var db = createAndOpenDB()

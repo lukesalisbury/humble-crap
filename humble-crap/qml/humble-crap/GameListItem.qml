@@ -1,10 +1,13 @@
 import QtQuick 2.0
 import QtQuick.XmlListModel 2.0
+import HumbleCrap.PackageHandling 1.0
 
 Item {
 	id: item1
 	height: 62
+	width: (parent.width ? parent.width : 400)
 	visible: true
+
 	property bool installed: false
 	property string listid: "x"
 	property string title: "x"
@@ -16,36 +19,37 @@ Item {
 	property string lastState: "0"
 	property int buttonMode: 0
 
-
 	property var downloadList: {
-			   'linux': "",
-			   'windows': "",
-			   'osx': "",
-			   'audio': "",
-			   'ebook': ""
-	}
+		'linux': "",
+		'windows': "",
+		'osx': "",
+		'audio': "",
+		'ebook': ""
+	};
+
 	property var datesList: {
-               'linux': "0",
-			   'windows': "0",
-			   'osx': "0",
-			   'audio': "0",
-			   'ebook': "0"
+		'linux': "0",
+		'windows': "0",
+		'osx': "0",
+		'audio': "0",
+		'ebook': "0"
 	}
 
-	width: (parent.width ? parent.width : 400)
+	onStateChanged: {
+		update()
+	}
 
 	function set(downloads, dates) {
 		downloadList = downloads
 		datesList = dates
 
 		xmlModel.insertInfo(listid, title, 0)
-		checkItemStatus();
+		checkItemStatus()
 
-		update();
+		update()
 	}
 
 	function update() {
-
 		switch (state) {
 		case "linux":
 			downloadUrl = downloadList['linux']
@@ -78,59 +82,70 @@ Item {
 		}
 	}
 
-	onStateChanged: {
-		update()
+	function playGame() {
+		var info = xmlModel.retrieveInfo(listid, subtitle)
+		console.log("play", info.installPath, info.executePath)
 	}
 
-	function playGame()
-	{
-	   var info = xmlModel.retrieveInfo(listid, subtitle);
-
-
-		console.log( "play", info.installPath, info.executePath )
+	function updateGame() {
+		var info = xmlModel.retrieveInfo(listid, subtitle)
+		console.log("update", info.installPath, url)
 	}
 
-	function updateGame()
-	{
-	   var info = xmlModel.retrieveInfo(listid, subtitle);
-
-
-	   console.log( "update", info.installPath, url )
-	}
-
-	function checkItemStatus()
-	{
-
+	function checkItemStatus() {
 		// "id", "displayName" "installed" "installPath" "executePath" "installDate"
-
-		var info = xmlModel.retrieveInfo(listid, subtitle);
+		var info = xmlModel.retrieveInfo(listid, subtitle)
 
 		var d = new Date(parseInt(releasedate) * 1000)
 		var i = new Date(info.installDate)
 
-		console.log( info.displayName, info.installed, info.installDate )
+		console.log(info.displayName, info.installed, info.installDate)
 
-		buttonAction.colour = "#1111FF";
+		buttonAction.colour = "#1111FF"
 		buttonAction.text = "Install"
-		buttonMode = 0;
-		if ( d > i )
-		{
-			buttonAction.colour = "#FF1111";
-			buttonAction.text = "Updated"
-			buttonMode = 1;
+		buttonMode = info.installed
+
+		if (info.installed === 2) {
+			setButtonToSetup()
 		}
 
-		if (info.installed)
-		{
-			textPlatform.text = "installed"
-			buttonAction.colour = "#11FF11";
-			buttonAction.text = "Play"
-			buttonMode = 2;
+		if (info.installed === 3) {
+			setButtonToPlay()
 		}
 
+		if (d > i) {
+			setButtonToUpdate()
+		}
+	}
+
+
+	function setButtonToUpdate()
+	{
+		buttonAction.colour = "#FF1111"
+		buttonAction.text = "Updated"
+		buttonMode = 1
+	}
+
+	function setButtonToSetup()
+	{
+		buttonAction.colour = "#FF11FF"
+		buttonAction.text = "Setup"
+		buttonMode = 2
+	}
+
+	function setButtonToPlay()
+	{
+		textPlatform.text = "installed"
+		buttonAction.colour = "#11FF11"
+		buttonAction.text = "Play"
+		buttonMode = 3
 	}
 
 	function updateDatabase() {}
+
+	PackageHandling {
+		id: packageHandler
+	}
 
 	Image {
 		id: imageIcon
@@ -158,25 +173,35 @@ Item {
 		anchors.bottomMargin: 8
 		anchors.right: parent.right
 		anchors.rightMargin: 4
-		url:  parent.downloadUrl
-        onClicked: {
-			if ( buttonMode === 2 ) // Play
+		url: parent.downloadUrl
+		onClicked: {
+			/* Button Modes */
+			// 0 Download
+			// 1 Update
+			// 2 install
+			// 3 Play
+			if (buttonMode === 3) // Play
 			{
 				parent.playGame()
 			}
-			else if ( buttonMode === 1 ) // Update
-			{
-				parent.updateGame()
-			}
-			else if ( buttonMode === 0 ) // Download
+			else if (buttonMode === 2) // install
 			{
 				//parent.install()
-				var filepackage = new PackageHandling
-
-				filepackage.SelectPackage();
-				downloadHumble.getFile(listid, url)
-
+				packageHandler.file = url
 			}
+			else if (buttonMode === 1) // Update
+			{
+				downloadHumble.getFile(listid, url)
+				buttonMode = 2
+			}
+			else if (buttonMode === 0) // Download
+			{
+				downloadHumble.getFile(listid, url)
+				buttonMode = 2
+			}
+
+			xmlModel. setMode(listid, buttonMode)
+			checkItemStatus();
 		}
 	}
 
@@ -200,7 +225,7 @@ Item {
 	}
 
 	Text {
-        property string date: (parent.date ? parent.date : "")
+		property string date: (parent.date ? parent.date : "")
 		id: textPlatform
 		x: 32
 		y: 37

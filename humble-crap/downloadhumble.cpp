@@ -159,8 +159,13 @@ void DownloadHumble::openFile( QString file )
 
 QString DownloadHumble::getContent()
 {
+    QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
 
-    QFile f("/home/luke/humble.txt");
+
+
+    qDebug() << path;
+
+    QFile f(path + "/humble.html");
     f.open(QIODevice::ReadOnly );
 
     QTextStream in(&f);

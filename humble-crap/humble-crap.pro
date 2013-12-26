@@ -3,7 +3,7 @@ folder_01.source = qml/humble-crap
 folder_01.target = qml
 DEPLOYMENTFOLDERS = folder_01
 
-Qt += network
+Qt += network widgets
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
@@ -16,7 +16,6 @@ QML_IMPORT_PATH =
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
 	downloadhumble.cpp \
-    packageplugin.cpp \
     packagehandling.cpp
 
 # Installation path
@@ -34,5 +33,7 @@ OTHER_FILES += \
 
 HEADERS += \
 	downloadhumble.hpp \
-    packageplugin.hpp \
     packagehandling.hpp
+
+
+Qt += network widgets
