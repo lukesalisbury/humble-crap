@@ -3,9 +3,8 @@ import QtQuick.XmlListModel 2.0
 import HumbleCrap.PackageHandling 1.0
 
 Item {
-	id: item1
 	height: 62
-	width: (parent.width ? parent.width : 400)
+	width: 400
 	visible: true
 
 	property bool installed: false
@@ -36,7 +35,7 @@ Item {
 	}
 
 	onStateChanged: {
-		update()
+		//update()
 	}
 
 	function set(downloads, dates) {
@@ -77,8 +76,8 @@ Item {
 			height = 62
 			visible = true
 		} else {
-			height = 0
-			visible = false
+			//height = 0
+			//visible = false
 		}
 	}
 
@@ -99,21 +98,24 @@ Item {
 		var d = new Date(parseInt(releasedate) * 1000)
 		var i = new Date(info.installDate)
 
-		console.log(info.displayName, info.installed, info.installDate)
+		//console.log(info.displayName, info.installed, info.installDate)
 
 		buttonAction.colour = "#1111FF"
 		buttonAction.text = "Install"
 		buttonMode = info.installed
 
-		if (info.installed === 2) {
+		if (info.installed === 2)
+		{
 			setButtonToSetup()
 		}
 
-		if (info.installed === 3) {
+		if (info.installed === 3)
+		{
 			setButtonToPlay()
 		}
 
-		if (d > i) {
+		if (d > i)
+		{
 			setButtonToUpdate()
 		}
 	}
@@ -213,6 +215,7 @@ Item {
 		anchors.left: imageIcon.right
 		anchors.leftMargin: 10
 		font.pixelSize: 15
+		color: "#FF0000"
 	}
 
 	Text {
@@ -241,21 +244,4 @@ Item {
 			text = (parent.date ? "Updated: " + d.toDateString() : "")
 		}
 	}
-	states: [
-		State {
-			name: "linux"
-		},
-		State {
-			name: "windows"
-		},
-		State {
-			name: "osx"
-		},
-		State {
-			name: "audio"
-		},
-		State {
-			name: "ebook"
-		}
-	]
 }

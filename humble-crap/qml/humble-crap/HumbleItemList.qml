@@ -64,15 +64,15 @@ XmlListModel {
 	}
 
 	onStatusChanged: {
-        if (xmlModel.status !== 1)
+		if (xmlModel.status == XmlListModel.Ready )
 		{
 			console.log("Status: " + xmlModel.status)
 			console.log("Count: " + xmlModel.count)
 		}
 
-        if (xmlModel.status !== 3)
+		if (xmlModel.status == XmlListModel.Error )
 		{
-			console.log("Error: " + xmlModel.errorString() )
+			console.log(xmlModel.status, "Error: " + xmlModel.errorString() )
 		}
 	}
 
@@ -136,7 +136,7 @@ XmlListModel {
 	{
 		var db = createAndOpenDB()
 
-		Qt.createComponent("StartUpDialog.qml").createObject(pageMainWindow, {});
+		Qt.createComponent("LoginDialog.qml").createObject(pageMainWindow, {});
 		
 		
 

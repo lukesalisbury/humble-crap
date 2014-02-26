@@ -28,8 +28,8 @@ qtcAddDeployment()
 OTHER_FILES += \
 	qml/humble-qrap/Button.qml \
     qml/humble-crap/GameListItem.qml \
-    qml/humble-crap/StartUpDialog.qml \
-    qml/humble-crap/main.qml
+    qml/humble-crap/main.qml \
+    qml/humble-crap/LoginDialog.qml
 
 HEADERS += \
 	downloadhumble.hpp \

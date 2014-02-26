@@ -44,7 +44,14 @@ void DownloadHumble::login(QString email, QString password, bool savePassword)
 {
     QNetworkRequest request;
 
+	if ( email.length() < 4 || password.length() < 6 )
+	{
+		this->errorMessage = "Please enter correct email and/or password";
+		emit appError();
+	}
+
     /* Log User and Password */
+
     currentPassword = password;
     currentUser = email;
 

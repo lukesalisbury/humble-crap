@@ -15,7 +15,7 @@ class DownloadHumble : public QObject
         Q_INVOKABLE void login(QString email, QString password , bool savePassword);
 
         Q_INVOKABLE void updateContent();
-        Q_INVOKABLE QString getContent();
+		Q_INVOKABLE QString getContent();
 
 		Q_INVOKABLE void saveFile( QByteArray  content, QString as );
 		Q_INVOKABLE void saveFile( QString content, QString as );

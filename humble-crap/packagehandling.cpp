@@ -29,8 +29,8 @@ QString PackageHandling::file() const
 bool PackageHandling::selectSource()
 {
 
-	QString fileName = QFileDialog::getOpenFileName(NULL, tr("Open Downloaded Package"), QStandardPaths::writableLocation( QStandardPaths::DownloadLocation ), tr("Package Files (*.zip *.tar.gz *.tar.bz2)"));
-	qDebug() << fileName;
+//	QString fileName = QFileDialog::getOpenFileName(NULL, tr("Open Downloaded Package"), QStandardPaths::writableLocation( QStandardPaths::DownloadLocation ), tr("Package Files (*.zip *.tar.gz *.tar.bz2)"));
+//	qDebug() << fileName;
 
 	return true;
 }
