@@ -5,7 +5,7 @@ import QtQuick.Window 2.0
 
 Window {
 	visible: true
-	title: "MyWindow"
+	title: "Humble Crap"
 
 	id: pageMainWindow
 	width: 600
@@ -133,16 +133,16 @@ Window {
 		}
 	}
 
-	Rectangle {
+	Item {
 		id: boxItem
 		anchors.right: parent.right
-		anchors.rightMargin: 0
+		anchors.rightMargin: 4
 		anchors.left: parent.left
-		anchors.leftMargin: 0
+		anchors.leftMargin: 4
 		anchors.top: boxTitle.bottom
-		anchors.topMargin: 0
+		anchors.topMargin: 4
 		anchors.bottom: parent.bottom
-		anchors.bottomMargin: 0
+		anchors.bottomMargin: 4
 	}
 
 
@@ -154,9 +154,14 @@ Window {
 	}
 
 	onDisplay: {
-		var list = Qt.createComponent("GameList.qml").createObject(boxItem);
-		list.model = xmlModel;
-		list.parent = boxItem;
+
+		var component = Qt.createComponent("GameList.qml");
+		if (component.status == Component.Ready)
+		{
+			var list = Qt.createComponent("GameList.qml").createObject(boxItem);
+			list.model = xmlModel;
+		}
+
 	}
 
 	function startUp() {
@@ -168,6 +173,8 @@ Window {
 		if ( downloadHumble.getSavePassword() )
 		{
 			display()
+			refresh()
+
 		}
 		else
 		{
