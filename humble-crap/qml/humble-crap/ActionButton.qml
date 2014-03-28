@@ -17,7 +17,7 @@ Item {
 
     function go()
     {
-        console.log("download", url);
+		console.log("download", url);
     }
 
 	Rectangle {

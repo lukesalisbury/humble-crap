@@ -164,6 +164,8 @@ Rectangle {
 					textMessage.text = downloadHumble.getErrorMessage()
 				}
 				onAppSuccess: {
+
+					pageMainWindow.display()
 					pageMainWindow.refresh()
 					pageLogin.destroy()
 				}

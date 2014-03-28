@@ -25,6 +25,6 @@ ListView {
 		}
 	}
 	Component.onCompleted: {
-		console.log( parent )
+		//console.log( parent )
 	}
 }

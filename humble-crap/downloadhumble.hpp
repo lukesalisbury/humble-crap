@@ -14,12 +14,13 @@ class DownloadHumble : public QObject
 		explicit DownloadHumble(QObject *parent = 0);
         Q_INVOKABLE void login(QString email, QString password , bool savePassword);
 
-        Q_INVOKABLE void updateContent();
-		Q_INVOKABLE QString getContent();
+		Q_INVOKABLE void updateOrdersPage();
+		Q_INVOKABLE QString getOrdersPage();
 
+		Q_INVOKABLE QByteArray readFile( QString file );
 		Q_INVOKABLE void saveFile( QByteArray  content, QString as );
 		Q_INVOKABLE void saveFile( QString content, QString as );
-		Q_INVOKABLE void getFile(QString id, QString url);
+		Q_INVOKABLE void downloadFile(QString id, QString url);
 		Q_INVOKABLE void openFile( QString file );
 
 		Q_INVOKABLE QString getUsername();
@@ -32,6 +33,7 @@ class DownloadHumble : public QObject
 		void downloadError();
         void appError();
         void appSuccess();
+		void contentFinished();
 
 	public slots:
         void finishDownload( QNetworkReply* pReply );

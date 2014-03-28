@@ -14,6 +14,8 @@ Window {
 
 	signal refresh
 	signal display
+	signal contentFinished
+
 
 	Rectangle {
 		id: boxTitle
@@ -108,7 +110,8 @@ Window {
 			onClicked: Qt.quit()
 		}
 	}
-
+	/*
+	// Old Listing
 	HumbleItemList {
 		id: xmlModel
 		function setContent(downloaded) {
@@ -132,7 +135,7 @@ Window {
 			xmlModel.xml = downloaded
 		}
 	}
-
+	*/
 	Item {
 		id: boxItem
 		anchors.right: parent.right
@@ -145,42 +148,69 @@ Window {
 		anchors.bottomMargin: 4
 	}
 
-
 	Component.onCompleted: startUp()
 
-	onRefresh: {
-		var downloaded = downloadHumble.getContent()
-		xmlModel.setContent(downloaded)
+	Connections {
+		target: downloadHumble
+		onAppError: {
+			buttonLogon.enabled = true
+			textMessage.text = downloadHumble.getErrorMessage()
+		}
+		onAppSuccess: {
+
+			pageMainWindow.display()
+			pageMainWindow.refresh()
+			pageLogin.destroy()
+		}
 	}
 
-	onDisplay: {
+	onRefresh: {
+		downloadHumble.updateOrdersPage()
 
+	}
+
+	onContentFinished: {
+
+		var keyRegEx = /gamekeys: (\[[A-Za-z0-9\", ]*\])/
+		var fullDownloadedPage = downloadHumble.getOrdersPage()
+
+		var startIndex = fullDownloadedPage.indexOf("new window.Gamelist(")
+
+		var endIndex = fullDownloadedPage.indexOf( ");\n  \n});\nvar flash = $('#flash');")
+
+		var gameOrders = fullDownloadedPage.substring(startIndex+ 10, endIndex).match(keyRegEx)
+
+
+
+		if ( gameOrders != null )
+		{
+			var gameOrderArray = JSON.parse(gameOrders[1]);
+			console.log( gameOrderArray )
+		}
+	}
+
+
+	onDisplay: {
 		var component = Qt.createComponent("GameList.qml");
 		if (component.status == Component.Ready)
 		{
 			var list = Qt.createComponent("GameList.qml").createObject(boxItem);
-			list.model = xmlModel;
+
 		}
 
 	}
 
 	function startUp() {
-		display()
-		refresh()
-
-
-		/*
-		if ( downloadHumble.getSavePassword() )
-		{
-			display()
-			refresh()
-
-		}
-		else
-		{
-			Qt.createComponent("LoginDialog.qml").createObject(boxItem, {});
-		}
-		*/
+		Qt.createComponent("LoginDialog.qml").createObject(boxItem, {});
+		//contentFinished()
 	}
+
+	Connections {
+		target: downloadHumble
+		onContentFinished: {
+			pageMainWindow.contentFinished()
+		}
+	}
+
 
 }

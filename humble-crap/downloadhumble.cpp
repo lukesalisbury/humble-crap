@@ -51,7 +51,6 @@ void DownloadHumble::login(QString email, QString password, bool savePassword)
 	}
 
     /* Log User and Password */
-
     currentPassword = password;
     currentUser = email;
 
@@ -60,7 +59,6 @@ void DownloadHumble::login(QString email, QString password, bool savePassword)
         settings.setValue("password", password);
     else
         settings.setValue("password", "");
-
 
     /* Make requests */
     connect(&webManager, SIGNAL(finished(QNetworkReply*)), SLOT(finishLogin(QNetworkReply*)));
@@ -94,6 +92,20 @@ void DownloadHumble::login(QString email, QString password, bool savePassword)
 }
 
 /* File Handling */
+QByteArray DownloadHumble::readFile( QString file )
+{
+	QByteArray data;
+	QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
+
+	QFile f(path + "/" + file);
+	f.open( QIODevice::ReadOnly );
+	data = f.readAll();
+
+	f.close();
+
+	return data;
+}
+
 void DownloadHumble::saveFile(QByteArray content, QString as)
 {
 	QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
@@ -105,9 +117,8 @@ void DownloadHumble::saveFile(QByteArray content, QString as)
 	f.write( content );
 
 	f.close();
-
-
 }
+
 
 void DownloadHumble::saveFile(QString content, QString as)
 {
@@ -120,11 +131,9 @@ void DownloadHumble::saveFile(QString content, QString as)
 
 	f.write( content.toUtf8() );
 	f.close();
-
-
 }
 
-void DownloadHumble::getFile(QString id, QString url )
+void DownloadHumble::downloadFile(QString id, QString url )
 {
     QNetworkRequest request;
 	QNetworkReply * reply;
@@ -132,8 +141,8 @@ void DownloadHumble::getFile(QString id, QString url )
 
     if ( QSslSocket::supportsSsl() )
     {
-		//request.setUrl(QUrl(url));
-		request.setUrl(QUrl("http://mokoi.info/images/index/os_windows.png"));
+		request.setUrl(QUrl(url));
+		//request.setUrl(QUrl("http://mokoi.info/images/index/os_windows.png"));
 		request.setRawHeader("User-Agent", "Humble-bundle Content Retrieving APplication");
 
         qDebug() << "Downloading ";
@@ -164,35 +173,19 @@ void DownloadHumble::openFile( QString file )
 
 
 
-QString DownloadHumble::getContent()
+QString DownloadHumble::getOrdersPage()
 {
-    QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
+	if ( !pageContent.length() )
+		pageContent = this->readFile( "humble.cache" );
 
-
-
-    qDebug() << path;
-
-    QFile f(path + "/humble.html");
-    f.open(QIODevice::ReadOnly );
-
-    QTextStream in(&f);
-    QString string = in.readAll();
-
-
-    f.close();
+	QString string = QString( pageContent.data() );
 
     return string;
-    /*
-    QString string = QString( pageContent.data() );
 
-    qDebug() << "downloadData.data()" << pageContent.data();
-
-    return string;
-    */
 }
 
 
-void DownloadHumble::updateContent()
+void DownloadHumble::updateOrdersPage()
 {
     QNetworkRequest request;
 
@@ -241,9 +234,6 @@ void DownloadHumble::finishDownload(QNetworkReply* pReply)
 		return;
 	}
 
-
-
-
 	// Save Content
 	QVariant id = pReply->property( "crap" );
 	QString path = pReply->url().path();
@@ -257,9 +247,6 @@ void DownloadHumble::finishDownload(QNetworkReply* pReply)
 	qDebug() << "Saved to" << basename << id.toString();
 	emit downloaded( id.toString(), basename);
 
-
-
-
 }
 
 
@@ -268,11 +255,11 @@ void DownloadHumble::finishLogin( QNetworkReply* pReply )
     QVariant redirectionTarget = pReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
     QUrl url = QUrl(redirectionTarget.toString());
 
-    qDebug() << url;
 
     disconnect(&webManager, SIGNAL(finished(QNetworkReply*)), 0, 0);
 
     pReply->deleteLater();
+
 
     if ( pReply->error() )
     {
@@ -290,14 +277,9 @@ void DownloadHumble::finishLogin( QNetworkReply* pReply )
     }
     else if ( url.path() == "/home" )
     {
-        emit appSuccess();
+		emit appSuccess();
+		return;
     }
-
-
-
-
-    pageContent = pReply->readAll();
-    emit appSuccess();
 
 
 }
@@ -308,7 +290,7 @@ void DownloadHumble::finishContent( QNetworkReply* pReply )
     QVariant redirectionTarget = pReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
     QUrl url = QUrl(redirectionTarget.toString());
 
-    qDebug() << url;
+
 
     disconnect(&webManager, SIGNAL(finished(QNetworkReply*)), 0, 0);
 
@@ -330,10 +312,13 @@ void DownloadHumble::finishContent( QNetworkReply* pReply )
     }
     else if ( url.path() == "/home" )
     {
-        pageContent = pReply->readAll();
-        emit appSuccess();
-    }
 
+    }
+	pageContent = pReply->readAll();
+
+	saveFile(pageContent, "humble.cache");
+
+	emit contentFinished();
 
 
 }
