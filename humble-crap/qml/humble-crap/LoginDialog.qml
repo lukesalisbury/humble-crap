@@ -1,74 +1,84 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.0
+import QtGraphicalEffects 1.0
+import QtQuick.Controls.Styles 1.0
 
 Rectangle {
 	id: pageLogin
+	color: "#60000000"
+	opacity: 1
+	z: 1
 	x: 0
 	y: 0
-	width: (parent.width ? parent.width : 200)
-	height: (parent.height ? parent.height : 200)
-	color: "#c8000000"
-	opacity: 1
-
-	z: 1
-
+	width: 300
+	height: 200
+	anchors.fill: parent
 	MouseArea {
 		id: mousearea1
-		x: 0
-		y: 0
-		width: parent.width
-		height: parent.height
+		anchors.fill: parent
 		propagateComposedEvents: false
 
 		Rectangle {
 			id: dialogLogin
 			x: 0
 			y: 0
-			width: 360
-			height: 180
-			color: "#6d1d1d"
-			anchors.horizontalCenter: parent.horizontalCenter
+			width: 316
+			height: 272
+			color: "#ffffff"
 			anchors.verticalCenter: parent.verticalCenter
+			anchors.horizontalCenter: parent.horizontalCenter
 			z: 11
-			ActionButton {
+			DialogButton {
 				id: buttonLogon
-				x: 261
-				y: 114
-				width: 76
-				height: 40
+				x: 217
+				y: 68
 				text: "Login"
 				anchors.bottom: parent.bottom
-				anchors.bottomMargin: 20
+				anchors.bottomMargin: 16
 				anchors.right: parent.right
-				anchors.rightMargin: 20
+				anchors.rightMargin: 24
 				z: 1
 				opacity: 1
 				KeyNavigation.tab: inputUser
 				onClicked: {
 					this.enabled = false
 					textMessage.text = "logging in"
-					downloadHumble.login(inputUser.text, inputPassword.text,
-										 inputSavePass.checked)
+
+					humbleCrap.setUsername(inputUser.text)
+					humbleCrap.setPassword(inputPassword.text, inputSavePass.checked)
+					humbleUser.login(inputUser.text, inputPassword.text)
 				}
+
 				Keys.onReturnPressed: {
 					buttonLogon.clicked()
 				}
 			}
 
 			Rectangle {
-				id: rectangle2
-				x: 178
-				y: 24
-				width: 159
+				id: rectangleEmail
+				x: 76
+				width: 200
 				height: 22
-				color: "#ffffff"
+				color: "#00000000"
+				anchors.top: textTitle.bottom
+				anchors.topMargin: 16
+				anchors.right: parent.right
+				anchors.rightMargin: 24
+				border.color: "#000000"
 
 				TextInput {
 					id: inputUser
-					text: downloadHumble.getUsername()
+					color: "#8a000000"
+					text: humbleCrap.getUsername()
+					selectionColor: "#607d8a"
+					anchors.rightMargin: 2
+					anchors.leftMargin: 2
+					anchors.bottomMargin: 2
+					anchors.topMargin: 2
+					transformOrigin: Item.Left
+					horizontalAlignment: Text.AlignLeft
 					clip: false
 					anchors.fill: parent
-					font.pixelSize: 12
 					KeyNavigation.tab: inputPassword
 					Keys.onReturnPressed: {
 						buttonLogon.clicked()
@@ -77,19 +87,29 @@ Rectangle {
 			}
 
 			Rectangle {
-				id: rectangle3
-				x: 178
-				y: 59
-				width: 159
+				id: rectanglePassword
+				x: 0
+				y: 0
+				width: 200
 				height: 23
-				color: "#ffffff"
+				color: "#00000000"
+				anchors.top: rectangleEmail.bottom
+				anchors.topMargin: 16
+				anchors.right: parent.right
+				anchors.rightMargin: 24
+				border.color: "#000000"
 
 				TextInput {
 					id: inputPassword
-					text: downloadHumble.getPassword()
+					color: "#000000"
+					text: humbleCrap.getPassword()
+					selectionColor: "#607e8a"
+					anchors.rightMargin: 2
+					anchors.leftMargin: 2
+					anchors.bottomMargin: 2
+					anchors.topMargin: 2
 					anchors.fill: parent
 					echoMode: TextInput.Password
-					font.pixelSize: 12
 					KeyNavigation.tab: inputSavePass
 					Keys.onReturnPressed: {
 						buttonLogon.clicked()
@@ -98,77 +118,130 @@ Rectangle {
 			}
 
 			Text {
-				id: text1
-				x: 134
-				y: 28
+				id: textEmail
+				y: 0
+				height: 0
+				color: "#000000"
 				text: qsTr("Email:")
+				anchors.verticalCenter: rectangleEmail.verticalCenter
+				anchors.left: parent.left
+				anchors.leftMargin: 24
+				anchors.right: rectangleEmail.left
+				anchors.rightMargin: 8
+				verticalAlignment: Text.AlignVCenter
 				font.bold: true
-				color: "#ffffff"
 				horizontalAlignment: Text.AlignRight
-				font.pixelSize: 12
 			}
 
 			Text {
-				id: text2
-				x: 114
-				y: 64
-				color: "#ffffff"
-				text: qsTr("Password")
+				id: textPassword
+				x: 0
+				y: 0
+				height: 0
+				color: "#000000"
+				text: qsTr("Password:")
+				verticalAlignment: Text.AlignVCenter
+				anchors.verticalCenter: rectanglePassword.verticalCenter
+				anchors.left: parent.left
+				anchors.leftMargin: 24
+				anchors.right: rectanglePassword.left
+				anchors.rightMargin: 8
 				font.bold: true
 				horizontalAlignment: Text.AlignRight
-				font.pixelSize: 12
 			}
 
 			CheckBox {
 				id: inputSavePass
-				x: 178
-				y: 88
-				checked: downloadHumble.getSavePassword()
+				x: 92
 				text: "Save Password"
+				anchors.top: rectanglePassword.bottom
+				anchors.topMargin: 16
+				checked: humbleCrap.getSavePassword()
 				KeyNavigation.tab: buttonLogon
-			}
-
-			Image {
-				id: image1
-				x: 8
-				y: 8
-				width: 100
-				height: 100
-				source: "humble-crap64.png"
 			}
 
 			Text {
 				id: textMessage
-				x: 17
-				y: 133
-				width: 233
+				y: 184
 				height: 14
-				color: "#ffffff"
+				color: "#000000"
 				text: qsTr("")
+				anchors.right: parent.right
+				anchors.rightMargin: 24
+				anchors.left: parent.left
+				anchors.leftMargin: 24
 				font.bold: true
-				font.pixelSize: 12
 			}
 
 			Text {
 				id: textWarning
-				x: 17
-				y: 167
-				color: "#ffffff"
-				text: qsTr("Unofficial - http://github.com/lukesalisbury/humble-crap/")
+				y: 204
+				color: "#000000"
+				text: "Website - http://github.com/lukesalisbury/humble-crap/"
+				anchors.right: parent.right
+				anchors.rightMargin: 24
+				anchors.left: parent.left
+				anchors.leftMargin: 24
 				font.pointSize: 8
 			}
 			Connections {
-				target: downloadHumble
+				target: humbleUser
 				onAppError: {
 					buttonLogon.enabled = true
-					textMessage.text = downloadHumble.getErrorMessage()
+					textMessage.text = humbleUser.getErrorMessage()
 				}
 				onAppSuccess: {
-
-					pageMainWindow.display()
-					pageMainWindow.refresh()
+					console.log("logged in")
+					pageMainWindow.updateOrders()
 					pageLogin.destroy()
 				}
+			}
+
+			Rectangle {
+				id: rectangle1
+				y: 0
+				height: 1
+				color: "#1e000000"
+				border.color: "#1e000000"
+				anchors.right: parent.right
+				anchors.rightMargin: 0
+				anchors.left: parent.left
+				anchors.leftMargin: 0
+				border.width: 0
+				anchors.bottom: parent.bottom
+				anchors.bottomMargin: 48
+			}
+
+			Text {
+				id: textTitle
+				x: 0
+				y: 0
+				text: qsTr("Login")
+				anchors.left: parent.left
+				anchors.leftMargin: 24
+				anchors.top: parent.top
+				anchors.topMargin: 24
+				font.pointSize: 14
+			}
+
+			DialogButton {
+				id: buttonClose
+				anchors.bottom: parent.bottom
+				anchors.bottomMargin: 16
+				anchors.left: parent.left
+				anchors.leftMargin: 24
+				text: "Close"
+				colour: "#8a000000"
+
+				KeyNavigation.tab: buttonLogon
+				onClicked: {
+					Qt.quit()
+				}
+
+				Keys.onReturnPressed: {
+					buttonLogon.clicked()
+				}
+
 			}
 		}
 	}

@@ -1,84 +1,87 @@
 import QtQuick 2.0
 
 Rectangle {
-    id: rectangle1
-    property string name: "Windows"
-	property string color: "#33aa2a"
-    signal clicked
-    width: 48
-    height: 14
-    radius: 3
-    border.width: 1
-    gradient: Gradient {
+	id: rectangle1
+	property string name: "Windows"
+	signal clicked
+	width: 120
+	height: 40
+	color: "#00000000"
+	radius: 0
+	clip: false
+	border.width: 0
 
-        GradientStop {
-            id: gradientstop1
-            position: 0
-			color: rectangle1.color
-        }
+	MouseArea {
+		id: mouseArea1
+		height: 48
+		anchors.fill: parent
+		hoverEnabled: true
+		onClicked: rectangle1.clicked()
+		onEntered: {
+			parent.state = 'hover'
+		}
+		onExited: {
+			parent.state = ' '
+		}
 
-        GradientStop {
-            id: gradientstop2
-            position: 1
-			color:  Qt.darker(rectangle1.color, 2.4)
-        }
-    }
+		Text {
+			id: text1
+			color: "#ffffff"
+			text: parent.parent.name
+			textFormat: Text.PlainText
+			style: Text.Normal
+			font.pointSize: 12
 
-    MouseArea {
-        anchors.fill: parent
-        hoverEnabled: true
-        onClicked: rectangle1.clicked()
-        onEntered: {
-            parent.state = 'hover'
-        }
-        onExited: {
-            parent.state = ' '
-        }
+			font.bold: false
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.verticalCenter: parent.verticalCenter
+			horizontalAlignment: Text.AlignHCenter
+		}
+		Rectangle {
+			id: rectangle2
+			y: 38
+			height: 2
+			color: "#ffffff"
+			opacity: 0
+			anchors.leftMargin: 0
+			anchors.left: parent.left
+			anchors.rightMargin: 0
+			anchors.right: parent.right
+			anchors.bottom: parent.bottom
+			anchors.bottomMargin: 0
+		}
+	}
+	states: [
+		State {
+			name: "hover"
 
-        Text {
-            id: text1
-            color: "#ffffff"
-            text: parent.parent.name
-            font.bold: true
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            horizontalAlignment: Text.AlignHCenter
-            styleColor: "#0b0a0a"
-            font.pixelSize: 8
-        }
-    }
-    states: [
-        State {
-            name: "hover"
+			PropertyChanges {
+				target: rectangle2
+				opacity: 1
+			}
+		},
+		State {
+			name: "active"
+			PropertyChanges {
+			}
 
-            PropertyChanges {
-                target: gradientstop1
-                position: 0
-                color: "#33aa2a"
-            }
-
-            PropertyChanges {
-                target: gradientstop2
-                position: 1
-                color: "#0b2509"
-            }
-
-            PropertyChanges {
-                target: text1
-                anchors.verticalCenterOffset: 1
-            }
-        }
-    ]
-    Transition {
-        from: " "
-        to: "hover"
-        SequentialAnimation {
-            NumberAnimation {
-                target: gradientstop2
-                easing.type: Easing.InQuad
-                properties: "color"
-                duration: 200
-            }
-        }
-    }
+			PropertyChanges {
+				target: rectangle2
+				color: "#fdf4c7"
+				opacity: 1
+			}
+		}
+	]
+	Transition {
+		from: " "
+		to: "hover"
+		SequentialAnimation {
+			NumberAnimation {
+				target: rectangle2
+				easing.type: Easing.InQuad
+				properties: "opacity"
+				duration: 200
+			}
+		}
+	}
 }

@@ -1,123 +1,53 @@
 import QtQuick 2.0
-import QtQuick.XmlListModel 2.0
-import HumbleCrap.PackageHandling 1.0
+import Crap.Humble.Package 1.0
+
+import "GameDatabase.js" as GameDatabase
+
+/* Button Modes */
+// 0 Download
+// 1 Update
+// 2 install
+// 3 Play
+
 
 Item {
 	height: 62
 	width: 400
 	visible: true
 
-	property bool installed: false
-	property string listid: "x"
+
+
+	property int isInstall: 0
+	property string databaseIdent: "x"
 	property string title: "x"
 	property string subtitle: "x"
 	property string icon: "humble-crap64.png"
 	property string type: "x"
-	property string downloadUrl: ""
-	property string releasedate: "0"
+	property alias releaseDate: textPlatform.date
+	property string installedDate: "0"
+	property url path: ""
+	property url executable: ""
+
+
 	property string lastState: "0"
 	property int buttonMode: 0
 
-	property var downloadList: {
-		'linux': "",
-		'windows': "",
-		'osx': "",
-		'audio': "",
-		'ebook': ""
-	};
-
-	property var datesList: {
-		'linux': "0",
-		'windows': "0",
-		'osx': "0",
-		'audio': "0",
-		'ebook': "0"
-	}
-
-	onStateChanged: {
-		//update()
-	}
-
-	function set(downloads, dates) {
-		downloadList = downloads
-		datesList = dates
-
-		xmlModel.insertInfo(listid, title, 0)
-		checkItemStatus()
-
-		update()
-	}
-
-	function update() {
-		switch (state) {
-		case "linux":
-			downloadUrl = downloadList['linux']
-			releasedate = datesList['linux']
-			break
-		case "osx":
-			downloadUrl = downloadList['osx']
-			releasedate = datesList['osx']
-			break
-		case "audio":
-			downloadUrl = downloadList['audio']
-			releasedate = "0"
-			break
-		case "ebook":
-			downloadUrl = downloadList['ebook']
-			releasedate = "0"
-			break
-		default:
-			downloadUrl = downloadList['windows']
-			releasedate = datesList['windows']
-			break
-		}
-
-		if (downloadUrl.length) {
-			height = 62
-			visible = true
-		} else {
-			//height = 0
-			//visible = false
-		}
-	}
-
-	function playGame() {
-		var info = xmlModel.retrieveInfo(listid, subtitle)
-		console.log("play", info.installPath, info.executePath)
-	}
-
-	function updateGame() {
-		var info = xmlModel.retrieveInfo(listid, subtitle)
-		console.log("update", info.installPath, url)
-	}
-
 	function checkItemStatus() {
-		// "id", "displayName" "installed" "installPath" "executePath" "installDate"
-		var info = xmlModel.retrieveInfo(listid, subtitle)
 
-		var d = new Date(parseInt(releasedate) * 1000)
-		var i = new Date(info.installDate)
-
-		//console.log(info.displayName, info.installed, info.installDate)
-
-		buttonAction.colour = "#1111FF"
-		buttonAction.text = "Install"
-		buttonMode = info.installed
-
-		if (info.installed === 2)
+		if ( isInstall === 0 )
 		{
-			setButtonToSetup()
+			var info = GameDatabase.getInfo( databaseIdent )
+
+			console.log( info.ident, info.url )
+			if ( info )
+			{
+			var component = notifications.addNotication("DownloadSnackbar.qml", { "url": info.url, textMode: false, cacheFile: "temp" }, function( content ){console.log( info.ident, info.url )} )
+			}
+
 		}
 
-		if (info.installed === 3)
-		{
-			setButtonToPlay()
-		}
 
-		if (d > i)
-		{
-			setButtonToUpdate()
-		}
+
 	}
 
 
@@ -143,23 +73,21 @@ Item {
 		buttonMode = 3
 	}
 
-	function updateDatabase() {}
-
-	PackageHandling {
+	Package {
 		id: packageHandler
 	}
 
 	Image {
 		id: imageIcon
 		x: 0
-		y: 15
+		y: 16
 		width: 32
 		anchors.left: parent.left
-		anchors.leftMargin: 0
+		anchors.leftMargin: 16
 		anchors.bottom: parent.bottom
-		anchors.bottomMargin: 15
+		anchors.bottomMargin: 16
 		anchors.top: parent.top
-		anchors.topMargin: 15
+		anchors.topMargin: 16
 		sourceSize.height: 32
 		sourceSize.width: 32
 		fillMode: Image.PreserveAspectFit
@@ -169,41 +97,17 @@ Item {
 	ActionButton {
 		id: buttonAction
 		x: 232
+		z: 2
 		anchors.top: parent.top
 		anchors.topMargin: 8
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 8
 		anchors.right: parent.right
 		anchors.rightMargin: 4
-		url: parent.downloadUrl
+		databaseIdent: parent.databaseIdent
+		text: "Download"
 		onClicked: {
-			/* Button Modes */
-			// 0 Download
-			// 1 Update
-			// 2 install
-			// 3 Play
-			if (buttonMode === 3) // Play
-			{
-				parent.playGame()
-			}
-			else if (buttonMode === 2) // install
-			{
-				//parent.install()
-				packageHandler.file = url
-			}
-			else if (buttonMode === 1) // Update
-			{
-				downloadHumble.getFile(listid, url)
-				buttonMode = 2
-			}
-			else if (buttonMode === 0) // Download
-			{
-				downloadHumble.getFile(listid, url)
-				buttonMode = 2
-			}
-
-			xmlModel. setMode(listid, buttonMode)
-			checkItemStatus();
+			checkItemStatus()
 		}
 	}
 
@@ -215,7 +119,7 @@ Item {
 		anchors.left: imageIcon.right
 		anchors.leftMargin: 10
 		font.pixelSize: 15
-		color: "#FF0000"
+		color: "#de000000"
 	}
 
 	Text {
@@ -228,7 +132,7 @@ Item {
 	}
 
 	Text {
-		property string date: (parent.date ? parent.date : "")
+		property string date: "0"
 		id: textPlatform
 		x: 32
 		y: 37
@@ -236,12 +140,12 @@ Item {
 
 		horizontalAlignment: Text.AlignRight
 		anchors.right: buttonAction.left
-		anchors.rightMargin: 0
+		anchors.rightMargin: 8
 		font.pixelSize: 10
 		text: ""
 		onDateChanged: {
-			var d = new Date(parseInt(parent.date) * 1000)
-			text = (parent.date ? "Updated: " + d.toDateString() : "")
+			var d = new Date(parseInt(date) * 1000)
+			text = (date ? "Updated: " + d.toDateString() : "")
 		}
 	}
 }

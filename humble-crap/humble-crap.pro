@@ -3,7 +3,6 @@ folder_01.source = qml/humble-crap
 folder_01.target = qml
 DEPLOYMENTFOLDERS = folder_01
 
-Qt += network widgets
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
@@ -15,8 +14,11 @@ QML_IMPORT_PATH =
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
-	downloadhumble.cpp \
-    packagehandling.cpp
+    packagehandling.cpp \
+    humbleuser.cpp \
+    humblenetwork.cpp \
+    humblecrap.cpp \
+    humbledownload.cpp
 
 # Installation path
 # target.path =
@@ -29,11 +31,16 @@ OTHER_FILES += \
 	qml/humble-qrap/Button.qml \
     qml/humble-crap/GameListItem.qml \
     qml/humble-crap/main.qml \
-    qml/humble-crap/LoginDialog.qml
+    qml/humble-crap/LoginDialog.qml \
+    qml/humble-crap/CategoryButton.qml
 
 HEADERS += \
-	downloadhumble.hpp \
-    packagehandling.hpp
+    packagehandling.hpp \
+    humbleuser.hpp \
+    humblenetwork.hpp \
+    humblecrap.hpp \
+    humbledownload.hpp
 
 
 Qt += network widgets
+LIBS += -lz

@@ -2,6 +2,9 @@ import QtQuick 2.0
 import QtQuick.XmlListModel 2.0
 import QtQuick.LocalStorage 2.0
 import QtQuick.Window 2.0
+import Crap.Humble.Download 1.0
+
+import "GameDatabase.js" as GameDatabase
 
 Window {
 	visible: true
@@ -10,19 +13,30 @@ Window {
 	id: pageMainWindow
 	width: 600
 	height: 400
-	color: "#000000"
+	color: "#FFFFFF"
 
 	signal refresh
 	signal display
-	signal contentFinished
+	signal updateOrders
+	signal updateList
+	signal quit
+	/* */
+	Connections {
+		target: humbleUser
+		onContentFinished: {
+			console.log("contentFinished")
+			pageMainWindow.updateOrders()
+		}
+	}
 
-
+	/* UI */
 	Rectangle {
 		id: boxTitle
 		z: 1
-		width: parent.width ? parent.width : 400
 		height: 64
-		color: "#3b3535"
+		color: "#607d8b"
+		enabled: true
+		border.width: 0
 		opacity: 1
 		visible: true
 		anchors.top: parent.top
@@ -31,26 +45,6 @@ Window {
 		anchors.leftMargin: 0
 		anchors.right: parent.right
 		anchors.rightMargin: 0
-		gradient: Gradient {
-			GradientStop {
-				position: 0
-				color: "#554343"
-			}
-			GradientStop {
-				position: 0.159
-				color: "#3b3434"
-			}
-
-			GradientStop {
-				position: 0.621
-				color: "#3b3535"
-			}
-
-			GradientStop {
-				position: 0.97
-				color: "#000000"
-			}
-		}
 		Text {
 			id: textTitle
 			y: 0
@@ -58,9 +52,11 @@ Window {
 			height: 29
 			color: "#ffffff"
 			text: qsTr("Humble Crap")
+			verticalAlignment: Text.AlignVCenter
+			font.pixelSize: 18
+			enabled: false
 			horizontalAlignment: Text.AlignHCenter
 			font.bold: true
-			font.pointSize: 18
 			anchors.left: parent.left
 			anchors.leftMargin: 0
 		}
@@ -72,6 +68,7 @@ Window {
 			height: 14
 			color: "#ffffff"
 			text: qsTr("Content Retrieving Application")
+			verticalAlignment: Text.AlignVCenter
 			horizontalAlignment: Text.AlignHCenter
 			anchors.left: textTitle.right
 			anchors.leftMargin: 6
@@ -89,13 +86,17 @@ Window {
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: 0
 			spacing: 2.0
-			CategoryButton2 {
+			CategoryButton {
 				id: categoryGames
 				name: "Games"
 			}
-			CategoryButton2 {
+			CategoryButton {
 				id: categoryAudio
 				name: "Audio"
+			}
+
+			Text {
+				id: updateNotice
 			}
 		}
 
@@ -107,110 +108,104 @@ Window {
 			anchors.rightMargin: 6
 
 			text: "Exit"
-			onClicked: Qt.quit()
+			onClicked: {
+				pageMainWindow.quit()
+			}
 		}
 	}
-	/*
-	// Old Listing
-	HumbleItemList {
-		id: xmlModel
-		function setContent(downloaded) {
 
-			var startIndex = downloaded.indexOf("<div id='regular_download_list'")
-
-			var endIndex = downloaded.indexOf(
-						"    </div>\n  </div>\n</div>\n\n<div id='confirm-apk' class='download-popup' style='display:none'>")
-			downloaded = downloaded.substring(startIndex, endIndex)
-
-			downloaded = downloaded.replace(
-						/<div class=\'[A-Za-z0-9 =_]*?\'><\/div>/g, "")
-			downloaded = downloaded.replace(/&t/g, "&amp;t")
-			downloaded = downloaded.replace(/\n{2,}/g, "\n")
-			downloaded = downloaded.replace(/\n {1,}\n/g, "\n")
-			downloaded = downloaded.replace(/<input([A-Za-z0-9 \'=_]*?)>/g, "")
-			downloaded = downloaded.replace(/<a class=\'a\'\s+ download/g,
-											"<a class='a'")
-
-			downloadHumble.saveFile(downloaded, "humble.xml")
-			xmlModel.xml = downloaded
-		}
-	}
-	*/
 	Item {
 		id: boxItem
 		anchors.right: parent.right
-		anchors.rightMargin: 4
+		anchors.rightMargin: 0
 		anchors.left: parent.left
-		anchors.leftMargin: 4
+		anchors.leftMargin: 0
 		anchors.top: boxTitle.bottom
-		anchors.topMargin: 4
+		anchors.topMargin: 0
 		anchors.bottom: parent.bottom
+		anchors.bottomMargin: 0
+
+		ListView {
+			id: gameList
+			model: list
+			anchors.top: parent.top
+			anchors.left: parent.left
+			anchors.right: parent.right
+			anchors.bottom: parent.bottom
+			snapMode: ListView.SnapToItem
+			visible: true
+			boundsBehavior: Flickable.StopAtBounds
+
+			delegate: GameListItem {
+				title: displayName
+				subtitle: authorName
+				databaseIdent: ident
+				type: type
+				isInstall: installed
+				path: installPath
+				installedDate: installDate
+				executable: executePath
+				releaseDate: date
+
+
+				anchors.left: parent.left
+				anchors.right: parent.right
+			}
+
+			Component.onCompleted: {
+
+
+			}
+
+		}
+
+	}
+
+	NotificationArea {
+		id: notifications
+		anchors.fill: parent
 		anchors.bottomMargin: 4
+		anchors.leftMargin: 4
 	}
 
-	Component.onCompleted: startUp()
-
-	Connections {
-		target: downloadHumble
-		onAppError: {
-			buttonLogon.enabled = true
-			textMessage.text = downloadHumble.getErrorMessage()
-		}
-		onAppSuccess: {
-
-			pageMainWindow.display()
-			pageMainWindow.refresh()
-			pageLogin.destroy()
-		}
+	ListModel {
+		id: list
 	}
 
+	UserDatabase {
+		id: userDatabase
+	}
+
+	/* Signals */
 	onRefresh: {
-		downloadHumble.updateOrdersPage()
 
 	}
 
-	onContentFinished: {
-
-		var keyRegEx = /gamekeys: (\[[A-Za-z0-9\", ]*\])/
-		var fullDownloadedPage = downloadHumble.getOrdersPage()
-
-		var startIndex = fullDownloadedPage.indexOf("new window.Gamelist(")
-
-		var endIndex = fullDownloadedPage.indexOf( ");\n  \n});\nvar flash = $('#flash');")
-
-		var gameOrders = fullDownloadedPage.substring(startIndex+ 10, endIndex).match(keyRegEx)
-
-
-
-		if ( gameOrders != null )
-		{
-			var gameOrderArray = JSON.parse(gameOrders[1]);
-			console.log( gameOrderArray )
+	onUpdateOrders: {
+		var fullDownloadedPage = humbleUser.getOrders()
+		if ( GameDatabase.parseOrders( notifications, fullDownloadedPage ) ) {
+			pageMainWindow.updateList()
 		}
 	}
 
+	onUpdateList: {
+		userDatabase.read()
+	}
 
 	onDisplay: {
-		var component = Qt.createComponent("GameList.qml");
-		if (component.status == Component.Ready)
-		{
-			var list = Qt.createComponent("GameList.qml").createObject(boxItem);
-
-		}
-
+		userDatabase.update( gameList.model )
 	}
 
-	function startUp() {
-		Qt.createComponent("LoginDialog.qml").createObject(boxItem, {});
-		//contentFinished()
+	onQuit: {
+		userDatabase.cancel()
+		Qt.quit()
 	}
 
-	Connections {
-		target: downloadHumble
-		onContentFinished: {
-			pageMainWindow.contentFinished()
-		}
-	}
+	Component.onCompleted: {
+		GameDatabase.createDatabase();
 
+		Qt.createComponent("LoginDialog.qml").createObject(pageMainWindow, {  })
+		//pageMainWindow.updateList()
+	}
 
 }
