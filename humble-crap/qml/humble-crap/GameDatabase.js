@@ -12,13 +12,15 @@ function parseOrders( notification, fullDownloadedPage ) {
 				");\n  \n});", startIndex)
 	var gameOrders = fullDownloadedPage.substring(startIndex + 10, endIndex).match(keyRegEx)
 	console.log("fullDownloadedPage", fullDownloadedPage.substring(startIndex + 10, endIndex))
-	//https://www.humblebundle.com/api/v1/order/UkqHKudh4E3V
+
 	if (gameOrders != null) {
 		var gameOrderArray = JSON.parse(gameOrders[1]);
-		for( var value in gameOrderArray ) {
-			console.log(value, gameOrderArray[value])
 
-			updateOrder(notification, gameOrderArray[value], "https://www.humblebundle.com/api/v1/order/" + gameOrderArray[value] )
+		if ( gameOrderArray.length )
+		{
+			for( var value in gameOrderArray ) {
+				updateOrder(notification, gameOrderArray[value], "https://www.humblebundle.com/api/v1/order/" + gameOrderArray[value] )
+			}
 		}
 		return true
 	}

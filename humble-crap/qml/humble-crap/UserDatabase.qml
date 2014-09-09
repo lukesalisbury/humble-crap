@@ -59,11 +59,15 @@ Item {
 
 	onRead: {
 		var data = GameDatabase.getOrders();
-		var notification = notifications.addNotication("ParseSnackbar.qml", { "title": "Updating Orders", "count": 0, "total": 1 }, startTimer )
-		for ( var i = 0; i < 1; i++ ) {
 
-			parseOrder( data[i].id, data[i].cache );
-			notification.count = i+1;
+		if ( data.length )
+		{
+			var notification = notifications.addNotication("ParseSnackbar.qml", { "title": "Updating Orders", "count": 0, "total": data.length }, startTimer )
+
+			for ( var i = 0; i < data.length; i++ ) {
+				parseOrder( data[i].id, data[i].cache );
+				notification.count = i+1;
+			}
 		}
 	}
 
