@@ -12,7 +12,7 @@ Rectangle {
 	property alias url: downloader.url
 	property alias progress: downloader.progress
 	property bool textMode: true
-	property url cacheFile: url()
+	property url cacheFile: ""
 
 	signal successful( string content )
 	signal error( string message )
@@ -65,7 +65,8 @@ Rectangle {
 	HumbleDownload {
 		id: downloader
 		onUrlChanged: {
-			text.text = "Downloading " + url
+			console.log( )
+			text.text = "Downloading " + getUrlFile()
 			makeRequest()
 		}
 		onAppError: {

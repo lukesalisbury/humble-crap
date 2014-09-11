@@ -20,8 +20,13 @@ public:
 	Q_INVOKABLE QString getError( );
 	Q_INVOKABLE bool writeContent( QString localFile );
 
+	Q_INVOKABLE QString getUrlFile();
+
+
 	void setUrl(const QString &a);
 	QString getUrl() const;
+
+
 
 signals:
 	void urlChanged();

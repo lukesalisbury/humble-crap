@@ -1,6 +1,7 @@
 .pragma library
 .import QtQuick.LocalStorage 2.0 as Sql
-.import Crap.Humble.Download 1.0 as HumbleDownload
+.import Crap.Humble.System 1.0 as HumbleSystem
+
 
 var database = "HumbleBundleItems";
 var queueCommands = new Array();
@@ -72,6 +73,9 @@ function runQuery(action, query ) {
 }
 
 function getOrders() {
+
+	console.log( HumbleSystem.platform, HumbleSystem.bits )
+
 	var array = new Array;
 	var db = getDatabase()
 	db.readTransaction(function (tx) {
@@ -89,7 +93,11 @@ function getList() {
 	var array = new Array;
 	var db = getDatabase()
 	db.readTransaction(function (tx) {
-		var results = tx.executeSql('SELECT DISTINCT l.*, platform, date FROM LISTINGS as l,DOWNLOADS as d WHERE ident=id AND platform = "windows" ORDER BY "ident"')
+		var platform = HumbleSystem.getPlatform();
+
+		console.log( platform )
+
+		var results = tx.executeSql('SELECT DISTINCT l.*, platform, date FROM LISTINGS as l,DOWNLOADS as d WHERE ident=id AND platform = "windows" ORDER BY "size"')
 
 		for ( var i = 0; i < results.rows.length; i++ ) {
 			array.push( results.rows.item(i) );
@@ -103,6 +111,9 @@ function getInfo(ident) {
 	var array = null;
 	var db = getDatabase()
 	db.readTransaction(function (tx) {
+		var platform = HumbleSystem.getPlatform();
+
+		console.log( platform )
 		var results = tx.executeSql('SELECT DISTINCT * FROM LISTINGS as l,DOWNLOADS as d WHERE ident=id AND platform = "windows" AND ident = "'+ident +'"' )
 
 		if ( results.rows.length > 0 ) {

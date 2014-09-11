@@ -54,6 +54,15 @@ QString HumbleDownload::getError()
 	return this->errorMessage;
 }
 
+QString HumbleDownload::getUrlFile()
+{
+	QUrl address = QUrl(this->url);
+
+
+	return address.path();
+}
+
+
 void HumbleDownload::setUrl(const QString &a)
 {
 	this->url = a;

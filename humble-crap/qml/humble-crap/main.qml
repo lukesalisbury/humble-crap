@@ -3,6 +3,7 @@ import QtQuick.XmlListModel 2.0
 import QtQuick.LocalStorage 2.0
 import QtQuick.Window 2.0
 import Crap.Humble.Download 1.0
+import Crap.Humble.System 1.0
 
 import "GameDatabase.js" as GameDatabase
 
@@ -202,10 +203,11 @@ Window {
 	}
 
 	Component.onCompleted: {
-		GameDatabase.createDatabase();
+		console.log( HumbleSystem, HumbleSystem.platform, HumbleSystem.bits )
+		//GameDatabase.createDatabase();
 
-		Qt.createComponent("LoginDialog.qml").createObject(pageMainWindow, {  })
-		//pageMainWindow.updateList()
+		//Qt.createComponent("LoginDialog.qml").createObject(pageMainWindow, {  })
+		pageMainWindow.updateList()
 	}
 
 }

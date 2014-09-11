@@ -4,6 +4,8 @@
 #include "packagehandling.hpp"
 #include "humbleuser.hpp"
 #include "humbledownload.hpp"
+#include "humblesystem.hpp"
+
 
 #include <QtGui/QGuiApplication>
 #include <QQmlContext>
@@ -11,6 +13,8 @@
 #include <QQmlEngine>
 #include <QQmlComponent>
 #include <QQuickWindow>
+
+
 
 // Humble Bundle Content Retrieving APplication
 QNetworkAccessManager webManager;
@@ -27,6 +31,7 @@ int main(int argc, char *argv[])
 {
 	qmlRegisterType<PackageHandling>( "Crap.Humble.Package", 1, 0, "HumblePackage");
 	qmlRegisterType<HumbleDownload>( "Crap.Humble.Download", 1, 0, "HumbleDownload");
+	qmlRegisterType<HumbleSystem>( "Crap.Humble.System", 1, 0, "HumbleSystem");
 
 
 	QQuickWindow * window;

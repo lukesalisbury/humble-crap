@@ -28,6 +28,8 @@ class HumbleCrap : public QObject
 		Q_INVOKABLE void setUsername( QString email );
 		Q_INVOKABLE void setPassword( QString password, bool save );
 
+
+
 	signals:
 		void refresh();
 		void appError( QString errorMessage );

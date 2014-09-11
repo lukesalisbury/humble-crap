@@ -44,7 +44,8 @@ Rectangle {
 
 	onCountChanged:
 	{
-		text.text = title + " " +  count + "/" + total;
+		if ( count % 4 == 0 )
+			text.text = title + " " +  count + "/" + total;
 		if ( count === total )
 		{
 			successful("completed")

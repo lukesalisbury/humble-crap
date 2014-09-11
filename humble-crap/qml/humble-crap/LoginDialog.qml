@@ -178,6 +178,7 @@ Rectangle {
 				y: 204
 				color: "#000000"
 				text: "Website - http://github.com/lukesalisbury/humble-crap/"
+				wrapMode: Text.WrapAnywhere
 				anchors.right: parent.right
 				anchors.rightMargin: 24
 				anchors.left: parent.left

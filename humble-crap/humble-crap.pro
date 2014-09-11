@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     humbleuser.cpp \
     humblenetwork.cpp \
     humblecrap.cpp \
-    humbledownload.cpp
+    humbledownload.cpp \
+    humblesystem.cpp
 
 # Installation path
 # target.path =
@@ -39,7 +40,8 @@ HEADERS += \
     humbleuser.hpp \
     humblenetwork.hpp \
     humblecrap.hpp \
-    humbledownload.hpp
+    humbledownload.hpp \
+    humblesystem.hpp
 
 
 Qt += network widgets

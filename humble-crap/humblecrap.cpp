@@ -7,7 +7,7 @@
 #include <QUrl>
 #include <QtWidgets/QMessageBox>
 #include <QSettings>
-
+#include <QSysInfo>
 #include <zlib.h>
 
 /**
@@ -161,5 +161,6 @@ void HumbleCrap::openFile( QString file )
 	QUrl file_path = QUrl(path + "/" + file );
 	QDesktopServices::openUrl(file_path);
 }
+
 
 
