@@ -3,6 +3,7 @@ import QtQuick 2.0
 Rectangle {
 	id: rectangle1
 	property string name: "Windows"
+	property string action: "Windows"
 	signal clicked
 	width: 120
 	height: 40

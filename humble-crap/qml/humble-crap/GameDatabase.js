@@ -1,7 +1,5 @@
 .pragma library
 .import QtQuick.LocalStorage 2.0 as Sql
-.import Crap.Humble.System 1.0 as HumbleSystem
-
 
 var database = "HumbleBundleItems";
 var queueCommands = new Array();
@@ -72,10 +70,7 @@ function runQuery(action, query ) {
 
 }
 
-function getOrders() {
-
-	console.log( HumbleSystem.platform, HumbleSystem.bits )
-
+function getOrders( ) {
 	var array = new Array;
 	var db = getDatabase()
 	db.readTransaction(function (tx) {
@@ -89,15 +84,13 @@ function getOrders() {
 	return array;
 }
 
-function getList() {
+function getList( page, bits ) {
+
 	var array = new Array;
 	var db = getDatabase()
 	db.readTransaction(function (tx) {
-		var platform = HumbleSystem.getPlatform();
 
-		console.log( platform )
-
-		var results = tx.executeSql('SELECT DISTINCT l.*, platform, date FROM LISTINGS as l,DOWNLOADS as d WHERE ident=id AND platform = "windows" ORDER BY "size"')
+		var results = tx.executeSql('SELECT DISTINCT l.*, platform, date FROM LISTINGS as l,DOWNLOADS as d WHERE ident=id AND platform = "' + page + '" ORDER BY "size"')
 
 		for ( var i = 0; i < results.rows.length; i++ ) {
 			array.push( results.rows.item(i) );
@@ -107,14 +100,11 @@ function getList() {
 	return array;
 }
 
-function getInfo(ident) {
+function getInfo(ident, platform) {
 	var array = null;
 	var db = getDatabase()
 	db.readTransaction(function (tx) {
-		var platform = HumbleSystem.getPlatform();
-
-		console.log( platform )
-		var results = tx.executeSql('SELECT DISTINCT * FROM LISTINGS as l,DOWNLOADS as d WHERE ident=id AND platform = "windows" AND ident = "'+ident +'"' )
+		var results = tx.executeSql('SELECT DISTINCT * FROM LISTINGS as l,DOWNLOADS as d WHERE ident=id AND platform = "' + platform + '" AND ident = "'+ident +'"' )
 
 		if ( results.rows.length > 0 ) {
 			array = results.rows.item(0);
@@ -133,7 +123,6 @@ function updateList( notification, listModel ) {
 	/* Read the orders */
 	db.readTransaction(function (tx) {
 		var results = tx.executeSql('SELECT id,cache FROM ORDERS')
-		console.log(results.rows.length)
 		for ( var i = 0; i < results.rows.length; i++ ) {
 			parseOrder(notification, results.rows.item(i).id, results.rows.item(i).cache  )
 		}
@@ -197,7 +186,7 @@ function getDatabase() {
 }
 
 function createDatabase() {
-	var db = Sql.LocalStorage.openDatabaseSync(database, "1.0", "", 1000000)
+	var db = getDatabase()
 	db.transaction( function (tx) {
 
 		var query_orders = 'CREATE TABLE IF NOT EXISTS ORDERS("id" TEXT NO NULL UNIQUE,"url" TEXT,"cache" TEXT );';

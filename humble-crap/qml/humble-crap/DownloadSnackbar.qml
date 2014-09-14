@@ -74,12 +74,11 @@ Rectangle {
 		}
 		onAppSuccess: {
 			console.log("onAppSuccess...")
-			if ( textMode)
+			if ( textMode) {
 				download_rectangle.successful( getContent() );
-			else
-			{
+			} else {
 				download_rectangle.successful( url.toString() );
-				writeContent(url)
+				writeContent(cacheFile)
 			}
 			download_rectangle.state = "Removing"
 		}

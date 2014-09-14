@@ -7,10 +7,8 @@ HumbleSystem::HumbleSystem(QObject *parent) :
 }
 
 
-QString HumbleSystem::getPlatform()
+QString HumbleSystem::getPlatform()  const
 {
-
-
 #if defined(Q_OS_OSX)
 	return "osx";
 #elif defined(Q_OS_LINUX)
@@ -22,7 +20,7 @@ QString HumbleSystem::getPlatform()
 	return "other";
 }
 
-int HumbleSystem::getPlatformBits()
+int HumbleSystem::getPlatformBits()  const
 {
 
 	return (int)QSysInfo::WordSize;

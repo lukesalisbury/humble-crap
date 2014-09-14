@@ -20,7 +20,7 @@
 QNetworkAccessManager webManager;
 HumbleCrap * t;
 HumbleUser * user;
-
+HumbleSystem * humble_system;
 
 QNetworkAccessManager * getNetworkManager()
 {
@@ -42,11 +42,13 @@ int main(int argc, char *argv[])
 
 	t = new HumbleCrap();
 	user = new HumbleUser();
+	humble_system = new HumbleSystem();
 
 	app.connect( &engine, SIGNAL(quit()), SLOT(quit()) );
 
 	engine.rootContext()->setContextProperty("humbleCrap", t);
 	engine.rootContext()->setContextProperty("humbleUser", user);
+	engine.rootContext()->setContextProperty("humbleSystem", humble_system);
 
 	if (!component.isReady())
 	{

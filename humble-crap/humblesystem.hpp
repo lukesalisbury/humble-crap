@@ -12,8 +12,8 @@ class HumbleSystem : public QObject
 public:
 	explicit HumbleSystem(QObject *parent = 0);
 
-	QString getPlatform();
-	int getPlatformBits();
+	QString getPlatform() const;
+	int getPlatformBits() const;
 
 signals:
 

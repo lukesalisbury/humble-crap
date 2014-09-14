@@ -3,7 +3,6 @@ import QtQuick.XmlListModel 2.0
 import QtQuick.LocalStorage 2.0
 import QtQuick.Window 2.0
 import Crap.Humble.Download 1.0
-import Crap.Humble.System 1.0
 
 import "GameDatabase.js" as GameDatabase
 
@@ -15,6 +14,8 @@ Window {
 	width: 600
 	height: 400
 	color: "#FFFFFF"
+
+	property string page: "games"
 
 	signal refresh
 	signal display
@@ -90,12 +91,30 @@ Window {
 			CategoryButton {
 				id: categoryGames
 				name: "Games"
+				action: "games"
+				onClicked: {
+					pageMainWindow.page = action;
+					pageMainWindow.display( )
+				}
 			}
 			CategoryButton {
 				id: categoryAudio
 				name: "Audio"
+				action: "audio"
+				onClicked: {
+					pageMainWindow.page = action;
+					pageMainWindow.display( )
+				}
 			}
-
+			CategoryButton {
+				id: categoryEbook
+				name: "Ebook"
+				action: "ebook"
+				onClicked: {
+					pageMainWindow.page = action;
+					pageMainWindow.display( )
+				}
+			}
 			Text {
 				id: updateNotice
 			}
@@ -185,7 +204,7 @@ Window {
 	onUpdateOrders: {
 		var fullDownloadedPage = humbleUser.getOrders()
 		if ( GameDatabase.parseOrders( notifications, fullDownloadedPage ) ) {
-			pageMainWindow.updateList()
+			pageMainWindow.updateList( )
 		}
 	}
 
@@ -194,7 +213,7 @@ Window {
 	}
 
 	onDisplay: {
-		userDatabase.update( gameList.model )
+		userDatabase.update( gameList.model, pageMainWindow.page, humbleSystem.bits )
 	}
 
 	onQuit: {
@@ -203,11 +222,12 @@ Window {
 	}
 
 	Component.onCompleted: {
-		console.log( HumbleSystem, HumbleSystem.platform, HumbleSystem.bits )
-		//GameDatabase.createDatabase();
+		categoryGames.action = humbleSystem.platform
+		page = humbleSystem.platform
+		GameDatabase.createDatabase();
 
-		//Qt.createComponent("LoginDialog.qml").createObject(pageMainWindow, {  })
-		pageMainWindow.updateList()
+		Qt.createComponent("LoginDialog.qml").createObject(pageMainWindow, {  })
+		//pageMainWindow.updateList(  )
 	}
 
 }

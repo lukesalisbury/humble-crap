@@ -7,7 +7,7 @@ Item {
 	property int updateCount: 0
 	property ParseSnackbar note: null
 	signal read
-	signal update( ListModel model )
+	signal update( ListModel model, string page, int bits )
 
 	signal cancel
 
@@ -48,7 +48,7 @@ Item {
 
 	function startTimer(content)
 	{
-		note =  notifications.addNotication("ParseSnackbar.qml", { "title": "Updating Orders", "count": 0, "total": GameDatabase.queueSize() }, function(content){ pageMainWindow.display() } )
+		note =  notifications.addNotication("ParseSnackbar.qml", { "title": "Updating Products", "count": 0, "total": GameDatabase.queueSize() }, function(content){ pageMainWindow.display() } )
 		workerTimer.running = true
 	}
 
@@ -58,7 +58,7 @@ Item {
 	}
 
 	onRead: {
-		var data = GameDatabase.getOrders();
+		var data = GameDatabase.getOrders(  );
 
 		if ( data.length )
 		{
@@ -72,7 +72,8 @@ Item {
 	}
 
 	onUpdate: {
-		var data = GameDatabase.getList();
+		updateCount = 0;
+		var data = GameDatabase.getList( page, bits );
 		gameWorker.sendMessage({'action': 'updateList', 'model':model, 'data': data })
 	}
 

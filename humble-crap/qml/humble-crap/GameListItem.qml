@@ -36,12 +36,13 @@ Item {
 
 		if ( isInstall === 0 )
 		{
-			var info = GameDatabase.getInfo( databaseIdent )
+			var info = GameDatabase.getInfo( databaseIdent, pageMainWindow.page )
 
-			console.log( info.ident, info.url )
+
 			if ( info )
 			{
-			var component = notifications.addNotication("DownloadSnackbar.qml", { "url": info.url, textMode: false, cacheFile: "temp" }, function( content ){console.log( info.ident, info.url )} )
+				console.log( info.ident, info.url )
+				var component = notifications.addNotication("DownloadSnackbar.qml", { "url": info.url, textMode: false, cacheFile: "temp" }, function( content ){console.log( info.ident, info.url )} )
 			}
 
 		}

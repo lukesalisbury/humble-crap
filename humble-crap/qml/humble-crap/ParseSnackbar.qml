@@ -25,7 +25,6 @@ Rectangle {
 		anchors.right: parent.right
 		anchors.rightMargin: 24
 		wrapMode: Text.WrapAnywhere
-		font.family: "Verdana"
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 18
 		anchors.left: parent.left

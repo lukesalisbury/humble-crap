@@ -53,6 +53,8 @@ WorkerScript.onMessage = function(msg) {
 	}
 	else if ( msg.action === 'updateList' ) {
 		/* Display */
+		msg.model.clear();
+		msg.model.sync();
 		for ( var i = 0; i < msg.data.length; i++ ) {
 			if ( msg.data[i].date > msg.data[i].installDate )
 			{
