@@ -17,10 +17,11 @@ Item {
 
 
 
-	property int isInstall: 0
+	property int status: 0
 	property string databaseIdent: "x"
 	property string title: "x"
 	property string subtitle: "x"
+	//https://humblebundle-a.akamaihd.net/static/hashed/b6a14061134afd6723852992edcdcd5679ac17f5.png
 	property string icon: "humble-crap64.png"
 	property string type: "x"
 	property alias releaseDate: textPlatform.date
@@ -108,7 +109,9 @@ Item {
 		databaseIdent: parent.databaseIdent
 		text: "Download"
 		onClicked: {
-			checkItemStatus()
+			//checkItemStatus()
+
+			Qt.createComponent("ItemDialog.qml").createObject(pageMainWindow, {  })
 		}
 	}
 

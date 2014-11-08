@@ -65,7 +65,6 @@ Rectangle {
 	HumbleDownload {
 		id: downloader
 		onUrlChanged: {
-			console.log( )
 			text.text = "Downloading " + getUrlFile()
 			makeRequest()
 		}
@@ -73,7 +72,6 @@ Rectangle {
 			download_rectangle.error( getError() );
 		}
 		onAppSuccess: {
-			console.log("onAppSuccess...")
 			if ( textMode) {
 				download_rectangle.successful( getContent() );
 			} else {

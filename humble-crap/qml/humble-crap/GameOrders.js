@@ -37,7 +37,7 @@ WorkerScript.parseOrder = function( orderid, ordercache ) {
 		var item = obj.subproducts[i];
 
 		var types = this.parseOrderDownload( item.machine_name, item.downloads )
-		WorkerScript.sendMessage({ 'action': 'replaceListing', 'query': { 'ident': item.machine_name, 'displayName':item.human_name, 'type':types } })
+		WorkerScript.sendMessage({ 'action': 'replaceListing', 'query': { 'ident': item.machine_name, 'product':item.human_name, 'type':types } })
 	}
 }
 

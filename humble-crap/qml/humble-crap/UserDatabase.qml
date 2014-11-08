@@ -27,10 +27,12 @@ Item {
 		running: false
 		repeat: true
 		onTriggered: {
-			if ( GameDatabase.queuePop() === false ) {
-				running = false;
-			} else {
+			var messageObject = GameDatabase.queuePop()
+			if ( messageObject ) {
+				GameDatabase.runQuery(messageObject.action, messageObject.query )
 				note.count++;
+			} else {
+				running = false;
 			}
 		}
 	}
@@ -42,7 +44,11 @@ Item {
 
 		for ( var i = 0; i < obj.subproducts.length; i++ ) {
 			var item = obj.subproducts[i];
-			GameDatabase.queueAdd({ 'action': 'replaceListing', 'query': { 'ident': item.machine_name, 'displayName':item.human_name, 'authorName': item.payee.human_name, 'downloads':item.downloads } })
+			if ( item.human_name ) {
+				GameDatabase.queueAdd({ 'action': 'replaceListing', 'query': { 'ident': item.machine_name, 'product':item.human_name, 'author': item.payee.human_name, 'downloads':item.downloads } })
+			} else {
+				console.log(item.machine_name, "has no name")
+			}
 		}
 	}
 
@@ -73,7 +79,7 @@ Item {
 
 	onUpdate: {
 		updateCount = 0;
-		var data = GameDatabase.getList( page, bits );
+		var data = GameDatabase.getListing( page, bits );
 		gameWorker.sendMessage({'action': 'updateList', 'model':model, 'data': data })
 	}
 

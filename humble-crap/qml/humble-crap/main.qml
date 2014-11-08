@@ -157,14 +157,14 @@ Window {
 			boundsBehavior: Flickable.StopAtBounds
 
 			delegate: GameListItem {
-				title: displayName
-				subtitle: authorName
+				title: product
+				subtitle: author
 				databaseIdent: ident
 				type: type
-				isInstall: installed
-				path: installPath
-				installedDate: installDate
-				executable: executePath
+				status: status
+				path: location
+				installedDate: updated
+				executable: executable
 				releaseDate: date
 
 
@@ -226,8 +226,10 @@ Window {
 		page = humbleSystem.platform
 		GameDatabase.createDatabase();
 
-		Qt.createComponent("LoginDialog.qml").createObject(pageMainWindow, {  })
-		//pageMainWindow.updateList(  )
+		// default
+		//Qt.createComponent("LoginDialog.qml").createObject(pageMainWindow, {  })
+		// use Cache
+		pageMainWindow.updateList(  )
 	}
 
 }

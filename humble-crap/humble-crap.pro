@@ -33,7 +33,8 @@ OTHER_FILES += \
     qml/humble-crap/GameListItem.qml \
     qml/humble-crap/main.qml \
     qml/humble-crap/LoginDialog.qml \
-    qml/humble-crap/CategoryButton.qml
+    qml/humble-crap/CategoryButton.qml \
+    qml/humble-crap/ItemDialog.qml
 
 HEADERS += \
     packagehandling.hpp \
