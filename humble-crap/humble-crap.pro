@@ -1,16 +1,3 @@
-# Add more folders to ship with the application, here
-folder_01.source = qml/humble-crap
-folder_01.target = qml
-DEPLOYMENTFOLDERS = folder_01
-
-
-# Additional import path used to resolve QML modules in Creator's code model
-QML_IMPORT_PATH =
-
-# If your application uses the Qt Mobility libraries, uncomment the following
-# lines and add the respective components to the MOBILITY variable.
-# CONFIG += mobility
-# MOBILITY +=
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
@@ -21,20 +8,6 @@ SOURCES += main.cpp \
     humbledownload.cpp \
     humblesystem.cpp
 
-# Installation path
-# target.path =
-
-# Please do not modify the following two lines. Required for deployment.
-include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
-qtcAddDeployment()
-
-OTHER_FILES += \
-	qml/humble-qrap/Button.qml \
-    qml/humble-crap/GameListItem.qml \
-    qml/humble-crap/main.qml \
-    qml/humble-crap/LoginDialog.qml \
-    qml/humble-crap/CategoryButton.qml \
-    qml/humble-crap/ItemDialog.qml
 
 HEADERS += \
     packagehandling.hpp \
@@ -42,8 +15,34 @@ HEADERS += \
     humblenetwork.hpp \
     humblecrap.hpp \
     humbledownload.hpp \
-    humblesystem.hpp
+    humblesystem.hpp \
+    global.hpp
 
 
-Qt += network widgets
+QT += network widgets qml quick core
 LIBS += -lz
+
+RESOURCES +=
+
+QMAKE_CXXFLAGS += -std=c++11
+
+
+DISTFILES += \
+    qml/humble-crap/GameDatabase.js \
+    qml/humble-crap/ActionButton.qml \
+    qml/humble-crap/ButtonBar.qml \
+    qml/humble-crap/DialogButton.qml \
+    qml/humble-crap/DownloadNotication.qml \
+    qml/humble-crap/FileChooserButton.qml \
+    qml/humble-crap/FileDialog.qml \
+    qml/humble-crap/NotificationArea.qml \
+    qml/humble-crap/PackageSelector.qml \
+    qml/humble-crap/ParseNotication.qml \
+	qml/humble-qrap/Button.qml \
+	qml/humble-crap/GameListItem.qml \
+	qml/humble-crap/main.qml \
+	qml/humble-crap/LoginDialog.qml \
+	qml/humble-crap/CategoryButton.qml \
+	qml/humble-crap/ItemDialog.qml \
+    qml/humble-crap/DatabaseListModel.qml \
+    qml/humble-crap/GameOrdersWorker.js

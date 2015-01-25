@@ -18,37 +18,20 @@
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
 
-#ifndef PACKAGEHANDLING_HPP
-#define PACKAGEHANDLING_HPP
-
-#include <QObject>
-#include <QDebug>
-
-class PackageHandling : public QObject
-{
-	Q_OBJECT
-	public:
-		explicit PackageHandling(QObject *parent = 0);
-
-		Q_PROPERTY(QString file READ file WRITE setFile NOTIFY fileChanged)
-
-		void setFile(const QString &a);
-		QString file() const;
-
-	signals:
-		void fileChanged();
-
-	public slots:
-
-
-private:
-	QString filename;
-
-	bool selectSource();
-
-	bool selectDestination();
-
-
-};
-
-#endif // PACKAGEHANDLING_HPP
+WorkerScript.onMessage = function(msg) {
+	if ( msg.action === 'updateList' ) {
+		/* Display */
+		msg.model.clear();
+		msg.model.sync();
+		for ( var i = 0; i < msg.data.length; i++ ) {
+			if ( msg.data[i].release > msg.data[i].installed )
+			{
+				WorkerScript.sendMessage({ 'action': 'update', 'id': msg.data[i].ident } )
+			}
+			msg.model.append( msg.data[i] );
+			if ( (i%10) == 0 )
+				msg.model.sync();
+		}
+		msg.model.sync();
+	}
+}

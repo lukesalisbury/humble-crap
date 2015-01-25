@@ -1,3 +1,23 @@
+/****************************************************************************
+* Copyright (c) 2015 Luke Salisbury
+*
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+*
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely, subject to the following restrictions:
+*
+* 1. The origin of this software must not be misrepresented; you must not
+*    claim that you wrote the original software. If you use this software
+*    in a product, an acknowledgement in the product documentation would be
+*    appreciated but is not required.
+* 2. Altered source versions must be plainly marked as such, and must not be
+*    misrepresented as being the original software.
+* 3. This notice may not be removed or altered from any source distribution.
+****************************************************************************/
+
 import QtQuick 2.0
 import QtQuick.Controls 1.0
 import QtGraphicalEffects 1.0
@@ -23,7 +43,7 @@ Rectangle {
 			x: 0
 			y: 0
 			width: 316
-			height: 272
+			height: 316
 			color: "#ffffff"
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.horizontalCenter: parent.horizontalCenter
@@ -45,8 +65,9 @@ Rectangle {
 					textMessage.text = "logging in"
 
 					humbleCrap.setUsername(inputUser.text)
-					humbleCrap.setPassword(inputPassword.text, inputSavePass.checked)
-					humbleUser.login(inputUser.text, inputPassword.text)
+					humbleCrap.setPassword(inputPassword.text,
+										   inputSavePass.checked)
+					humbleUser.login(inputUser.text, inputPassword.text, inputPin.text)
 				}
 
 				Keys.onReturnPressed: {
@@ -162,14 +183,17 @@ Rectangle {
 
 			Text {
 				id: textMessage
-				y: 184
-				height: 14
 				color: "#000000"
 				text: qsTr("")
+				wrapMode: Text.WrapAnywhere
+
+				anchors.top: rectanglePin.bottom
+				anchors.topMargin: 16
 				anchors.right: parent.right
 				anchors.rightMargin: 24
 				anchors.left: parent.left
 				anchors.leftMargin: 24
+
 				font.bold: true
 			}
 
@@ -178,7 +202,11 @@ Rectangle {
 				y: 204
 				color: "#000000"
 				text: "Website - http://github.com/lukesalisbury/humble-crap/"
+				verticalAlignment: Text.AlignBottom
+				anchors.bottom: rectangle1.top
+				anchors.bottomMargin: 8
 				wrapMode: Text.WrapAnywhere
+				anchors.top: textMessage.bottom
 				anchors.right: parent.right
 				anchors.rightMargin: 24
 				anchors.left: parent.left
@@ -200,7 +228,6 @@ Rectangle {
 
 			Rectangle {
 				id: rectangle1
-				y: 0
 				height: 1
 				color: "#1e000000"
 				border.color: "#1e000000"
@@ -242,8 +269,48 @@ Rectangle {
 				Keys.onReturnPressed: {
 					buttonLogon.clicked()
 				}
-
 			}
+
+			Rectangle {
+				id: rectanglePin
+				x: 92
+				y: 180
+				width: 200
+				height: 22
+				color: "#00000000"
+				anchors.topMargin: 16
+				TextInput {
+					id: inputPin
+					color: "#8a000000"
+					text: ""
+					anchors.topMargin: 2
+					anchors.fill: parent
+					transformOrigin: Item.Left
+					horizontalAlignment: Text.AlignLeft
+					anchors.rightMargin: 2
+					selectionColor: "#607d8a"
+					anchors.bottomMargin: 2
+					clip: false
+					anchors.leftMargin: 2
+				}
+				anchors.rightMargin: 24
+				border.color: "#000000"
+				anchors.top: inputSavePass.bottom
+				anchors.right: parent.right
+			}
+
+   Text {
+	   id: textPin
+	   y: 177
+	   text: qsTr("Pin:")
+	   horizontalAlignment: Text.AlignRight
+	   anchors.verticalCenter: rectanglePin.verticalCenter
+	   anchors.right: rectanglePin.left
+	   anchors.rightMargin: 8
+	   anchors.left: parent.left
+	   anchors.leftMargin: 24
+	   font.bold: true
+   }
 		}
 	}
 }

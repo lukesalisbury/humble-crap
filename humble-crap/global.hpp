@@ -18,37 +18,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
 
-#ifndef PACKAGEHANDLING_HPP
-#define PACKAGEHANDLING_HPP
+#ifndef GLOBAL_HPP
+#define GLOBAL_HPP
 
-#include <QObject>
-#include <QDebug>
+#endif // GLOBAL_HPP
 
-class PackageHandling : public QObject
-{
-	Q_OBJECT
-	public:
-		explicit PackageHandling(QObject *parent = 0);
-
-		Q_PROPERTY(QString file READ file WRITE setFile NOTIFY fileChanged)
-
-		void setFile(const QString &a);
-		QString file() const;
-
-	signals:
-		void fileChanged();
-
-	public slots:
-
-
-private:
-	QString filename;
-
-	bool selectSource();
-
-	bool selectDestination();
-
-
-};
-
-#endif // PACKAGEHANDLING_HPP

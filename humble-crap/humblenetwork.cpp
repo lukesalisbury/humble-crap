@@ -1,6 +1,26 @@
+/****************************************************************************
+* Copyright (c) 2015 Luke Salisbury
+*
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+*
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely, subject to the following restrictions:
+*
+* 1. The origin of this software must not be misrepresented; you must not
+*    claim that you wrote the original software. If you use this software
+*    in a product, an acknowledgement in the product documentation would be
+*    appreciated but is not required.
+* 2. Altered source versions must be plainly marked as such, and must not be
+*    misrepresented as being the original software.
+* 3. This notice may not be removed or altered from any source distribution.
+****************************************************************************/
+#include <zlib.h>
+
 #include "humblenetwork.hpp"
 
-#include <zlib.h>
 QNetworkAccessManager * getNetworkManager();
 
 QByteArray gUncompress(const QByteArray &data)
@@ -59,11 +79,16 @@ QByteArray gUncompress(const QByteArray &data)
  * @param url
  * @param parent
  */
-HumbleNetworkRequest::HumbleNetworkRequest()
+void HumbleNetworkRequest::getToken()
+{
+	connect( this, SIGNAL(contentFinished(QByteArray)), this, SLOT(finishRequestCookies(QByteArray)));
+	this->makeRequest( QUrl("https://www.humblebundle.com/login") );
+}
+
+HumbleNetworkRequest::HumbleNetworkRequest() : cookiesRetrieved(0)
 {
 	/* Setup webManager */
 	this->webManager = getNetworkManager();
-
 
 	connect( this->webManager, SIGNAL( sslErrors(QNetworkReply*, const QList<QSslError>) ), SLOT( sslError(QNetworkReply*, const QList<QSslError> )));
 
@@ -73,6 +98,7 @@ HumbleNetworkRequest::HumbleNetworkRequest()
 		this->errorMessage = "OpenSSL not installed";
 		emit downloadError( this->errorMessage );
 	}
+
 }
 
 /**
@@ -133,7 +159,7 @@ bool HumbleNetworkRequest::makeRequest( QUrl url )
 		request.setRawHeader("User-Agent", "Humble-bundle Content Retrieving APplication");
 		request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 		request.setRawHeader("Accept-Encoding", "gzip,deflate,qcompress" );
-
+		request.setRawHeader("Referer", "http://github.org/lukesalisbury/humble-crap" );
 		request.setUrl( url );
 
 		connect( this->webManager, SIGNAL( finished(QNetworkReply*) ), this, SLOT( finishRequest(QNetworkReply*)) );
@@ -152,6 +178,26 @@ bool HumbleNetworkRequest::makeRequest( QUrl url )
 		return true;
 	}
 	return false;
+}
+
+QNetworkCookieJar *HumbleNetworkRequest::getCookies()
+{
+	return this->webManager->cookieJar();
+}
+
+/**
+ * @brief HumbleNetworkRequest::finishRequestCookies
+ * @param content
+ */
+void HumbleNetworkRequest::finishRequestCookies(QByteArray content)
+{
+	QNetworkCookieJar * cookies = this->webManager->cookieJar();
+	QList<QNetworkCookie> list = cookies->cookiesForUrl( QUrl("https://www.humblebundle.com/") );
+
+	qDebug() << "cookies:" << quint32(list.size());
+	cookiesRetrieved = true;
+
+	disconnect( this, SIGNAL(contentFinished(QByteArray)), NULL, NULL );
 }
 
 /**
@@ -175,41 +221,46 @@ void HumbleNetworkRequest::downloadProgress(qint64 bytesReceived, qint64 bytesTo
 	emit progressUpdate(bytesReceived, bytesTotal);
 }
 
+
+
 /**
  * @brief HumbleNetworkRequest::finishRequest
  * @param pReply
  */
 void HumbleNetworkRequest::finishRequest( QNetworkReply* pReply )
 {
-
 	if ( pReply == reply )
 	{
-
-
 		QVariant redirectionTarget = pReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
 		QUrl url = redirectionTarget.toUrl();
 
 		pReply->deleteLater();
 
 		disconnect(this->webManager, SIGNAL(finished(QNetworkReply*)), this, 0);
+
 		if ( pReply->error() )
 		{
 			qDebug() << tr("Download failed: %1.").arg(pReply->errorString());
 			this->errorMessage = pReply->errorString();
 			emit downloadError( this->errorMessage );
+
+			//disconnect(this, 0, 0, 0);
 		}
 		else if ( url.path() == "/login" )
 		{
 			qDebug() << tr("Login failed") << url.query();
 			this->errorMessage = "Login failed";
 			emit downloadError( this->errorMessage );
+
+			//disconnect(this, 0, 0, 0);
 		}
 		else if ( url.isEmpty() )
 		{
 			this->downloadData = pReply->readAll();
 			qDebug() << tr("Download Successful: %1").arg(pReply->url().toString() );
-
 			emit contentFinished( this->downloadData );
+
+			//disconnect(this, 0, 0, 0);
 		}
 		else
 		{
