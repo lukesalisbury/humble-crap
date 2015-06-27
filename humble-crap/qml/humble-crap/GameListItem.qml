@@ -70,9 +70,9 @@ Item {
 	onUpdateStatus: {
 		database_info = GameDatabase.getInfo(dbIdent, dbFormat,pageMainWindow.page)
 
-		dbInstalledDate = database_info['installed']
-		dbExecutable = database_info['executable']
-		dbLocation = database_info['location']
+		dbInstalledDate = database_info['installed'] ? database_info['installed'] : ''
+		dbExecutable = database_info['executable'] ? database_info['executable'] : ''
+		dbLocation = database_info['location'] ? database_info['location'] : ''
 
 		checkStatus();
 	}

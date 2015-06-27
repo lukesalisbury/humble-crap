@@ -258,6 +258,7 @@ void HumbleNetworkRequest::finishRequest( QNetworkReply* pReply )
 		{
 			this->downloadData = pReply->readAll();
 			qDebug() << tr("Download Successful: %1").arg(pReply->url().toString() );
+			//qDebug() << this->downloadData;
 			emit contentFinished( this->downloadData );
 
 			//disconnect(this, 0, 0, 0);

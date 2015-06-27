@@ -111,7 +111,7 @@ void HumbleUser::updateOrders()
 		connect( &request, SIGNAL(contentFinished(QByteArray)), this, SLOT(ordersReturned(QByteArray)));
 		connect( &request, SIGNAL(downloadError(QString)), this, SLOT(ordersError(QString)) );
 
-		request.makeRequest( QUrl("https://www.humblebundle.com/home") );
+		request.makeRequest( QUrl("https://www.humblebundle.com/home/library") );
 	}
 	else
 	{
@@ -127,9 +127,9 @@ void HumbleUser::updateOrders()
  */
 void HumbleUser::ordersReturned( QByteArray content )
 {
+	qDebug() << "ordersReturned:";
 	disconnect( &request, SIGNAL(contentFinished(QByteArray)), NULL, NULL);
 	disconnect( &request, SIGNAL(downloadError(QString)), NULL, NULL );
-	qDebug() << "contentsReturned:" << content;
 	pageContent = content;
 	emit orderSuccess();
 }
@@ -153,7 +153,7 @@ void HumbleUser::loginReturned( QByteArray content )
 	disconnect( &request, SIGNAL(contentFinished(QByteArray)), NULL, NULL);
 	disconnect( &request, SIGNAL(downloadError(QString)), NULL, NULL );
 
-	//qDebug() << "loginReturned:" << content;
+	qDebug() << "loginReturned:" << content;
 	loginSuccess = true;
 	emit appSuccess();
 }

@@ -24,7 +24,7 @@ import Crap.Humble.Download 1.0
 Rectangle {
 	id: download_rectangle
 	width: 288
-	height: 48
+	height: 32
 	color: "#333333"
 	radius: 1
 	border.width: 0
@@ -42,8 +42,8 @@ Rectangle {
 		color: "#ffffff"
 		text: qsTr("Text")
 		verticalAlignment: Text.AlignVCenter
-		anchors.right: status.left
-		anchors.rightMargin: 0
+		anchors.right: parent.right
+		anchors.rightMargin: 24
 		wrapMode: Text.WrapAnywhere
 		font.family: "Verdana"
 		anchors.bottom: parent.bottom
@@ -53,33 +53,6 @@ Rectangle {
 		anchors.top: parent.top
 		anchors.topMargin: 18
 		font.pointSize: 8
-	}
-
-	Rectangle {
-		id: status
-		x: 0
-		width: 64
-		color: "#dedede"
-		anchors.top: parent.top
-		anchors.topMargin: 8
-		anchors.bottom: parent.bottom
-		anchors.bottomMargin: 8
-		anchors.right: parent.right
-		anchors.rightMargin: 24
-		border.width: 0
-
-		Rectangle {
-			id: meter
-			width: 0
-			color: "Red"
-			anchors.top: parent.top
-			anchors.bottom: parent.bottom
-			anchors.left: parent.left
-
-			anchors.topMargin: 2
-			anchors.bottomMargin: 2
-			anchors.leftMargin: 2
-		}
 	}
 
 	HumbleDownload {
@@ -106,7 +79,7 @@ Rectangle {
 			//console.log("onDownloadStarted")
 		}
 		onProgressUpdate: {
-			meter.width = (status.width - 4) * progress
+
 		}
 	}
 
@@ -115,20 +88,11 @@ Rectangle {
 			name: "Removing"
 			PropertyChanges {
 				target: download_rectangle
-				opacity: 0
 				height: 0
+				radius: 0
+				opacity: 0
 			}
 		}
 	]
 
-	transitions: [
-		Transition {
-			from: "*"; to: "Removing"
-			NumberAnimation { properties: "opacity"; easing.type: Easing.OutCurve; duration: 1000; onRunningChanged: {
-					if (!running) {
-						console.log("Destroying...")
-					}
-				} }
-		}
-	]
 }

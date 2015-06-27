@@ -45,4 +45,8 @@ DISTFILES += \
 	qml/humble-crap/CategoryButton.qml \
 	qml/humble-crap/ItemDialog.qml \
     qml/humble-crap/DatabaseListModel.qml \
-    qml/humble-crap/GameOrdersWorker.js
+    qml/humble-crap/GameOrdersWorker.js \
+    qml/humble-crap/BackgroundDownloadNotication.qml \
+    qml/humble-crap/SimpleDownloadNotication.qml \
+    qml/humble-crap/OrderParseNotication.qml \
+    qml/humble-crap/UpdateListWorker.js

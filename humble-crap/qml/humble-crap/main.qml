@@ -47,7 +47,7 @@ Window {
 	Connections {
 		target: humbleUser
 		onOrderSuccess: {
-			console.log("contentFinished")
+			console.log("onOrderSuccess")
 			GameDatabase.setUser(humbleUser.getUser())
 			pageMainWindow.parseOrders()
 		}
@@ -191,13 +191,12 @@ Window {
 				dbIdent: ident
 				dbIcon: icon ? icon : "humble-crap64.png"
 				dbFormat: format
-				dbLocation: location
-				dbExecutable: executable
+				dbLocation: location ? location : ''
+				dbExecutable: executable ? executable : ''
 				dbInstalledDate: installed
 				dbReleaseDate: release
 				anchors.left: parent.left
 				anchors.right: parent.right
-
 			}
 		}
 	}
@@ -207,6 +206,24 @@ Window {
 		anchors.fill: parent
 		anchors.bottomMargin: 4
 		anchors.leftMargin: 4
+		property int watchCount: 0
+		property int watchTotal: 0
+		onWatchCountChanged: {
+			if (watchTotal != 0) {
+				if (watchCount == watchTotal) {
+					pageMainWindow.updateList()
+					watchTotal = 0
+					watchCount = 0
+				}
+			}
+		}
+	}
+
+
+
+
+	DatabaseParseList {
+		id: parseDatabaseList
 	}
 
 	DatabaseListModel {
@@ -218,7 +235,7 @@ Window {
 		source: "GameOrdersWorker.js"
 
 		onMessage: {
-			databaseList.updateCount++;
+			databaseList.updateCount++
 		}
 	}
 
@@ -229,24 +246,28 @@ Window {
 		repeat: true
 		onTriggered: {
 			var messageObject = GameDatabase.queuePop()
-			if ( messageObject ) {
-				GameDatabase.runQuery( messageObject.action, messageObject.query, messageObject.data )
-				databaseList.note.count++;
+			if (messageObject) {
+
+				GameDatabase.runQuery(messageObject.action,
+									  messageObject.query, messageObject.data)
+				databaseList.note.count++
 			} else {
-				running = false;
+				running = false
 			}
 		}
 	}
 
+
 	/* Signals */
 	onParseOrders: {
 		var fullDownloadedPage = humbleUser.getOrders()
-		if (GameDatabase.parseOrders(notifications, fullDownloadedPage))
-			pageMainWindow.updateList()
+		if (GameDatabase.parseOrders(notifications, fullDownloadedPage)) {
+
+		}
 	}
 
 	onRefresh: {
-
+		parseDatabaseList.updateList()
 	}
 
 	onUpdateOrders: {
@@ -254,14 +275,15 @@ Window {
 	}
 
 	onUpdateList: {
-		databaseList.updateList( )
+		parseDatabaseList.updateList()
 	}
 
 	onDisplay: {
-		databaseList.display( pageMainWindow.page, humbleSystem.bits )
+		databaseList.display(pageMainWindow.page, humbleSystem.bits)
 	}
 
 	onQuit: {
+		parseDatabaseList.cancel()
 		databaseList.cancel()
 		Qt.quit()
 	}
@@ -273,10 +295,8 @@ Window {
 		// default
 		Qt.createComponent("LoginDialog.qml").createObject(pageMainWindow, {  })
 
-
 		// use Cache ( Use Existing )
 		//GameDatabase.setUser("email")
-		//pageMainWindow.updateList(  )
-
+		//pageMainWindow.updateList()
 	}
 }

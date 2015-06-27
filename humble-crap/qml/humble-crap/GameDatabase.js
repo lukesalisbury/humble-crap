@@ -21,7 +21,7 @@
 .import QtQuick.LocalStorage 2.0 as Sql
 
 var database = "HumbleBundleItems";
-var queueCommands = new Array();
+var queueCommands = [];
 
 function queueSize( ) {
 	return queueCommands.length
@@ -39,8 +39,6 @@ function queuePop( ) {
 function databaseQuery( query, data ) {
 	var db = getDatabase()
 
-	for (var prop in data)
-		console.log(prop, "=", data[prop])
 
 	var object = db.transaction(function (tx) {
 		var results = tx.executeSql( query, data )
@@ -64,10 +62,12 @@ function getDownloadTypes( id ) {
 
 
 function runQuery( action, query, data ) {
+	var db = getDatabase()
+	var object
 	if ( action === 'replaceListing' )
 	{
-		var db = getDatabase()
-		var object = db.transaction(function (tx) {
+
+		object = db.transaction(function (tx) {
 			var results = tx.executeSql( query,	data )
 			if ( results.rowsAffected == 0 )
 			{
@@ -75,7 +75,17 @@ function runQuery( action, query, data ) {
 			}
 		})
 	}
+	else if ( action === 'replaceDownloads' )
+	{
+		object = db.transaction(function (tx) {
+			var results = tx.executeSql( query,	data )
+		})
+	}
+
+
 }
+
+
 
 function getOrders( ) {
 	var array = new Array;
@@ -141,21 +151,19 @@ function parseDownload( id, downloads ) {
 	return types
 }
 
-//function parseOrder( orderid, ordercache ) {
-//	var db = getDatabase()
-//	var obj = JSON.parse( ordercache );
+function insertSubProducts( item ) {
+	if ( item.human_name ) {
+		var type = parseDownload(item.machine_name, item.downloads)
+		queueAdd({
+			'action': 'replaceListing',
+			'query': 'UPDATE LISTINGS SET product = ?, author = ?, icon = ?, type = ? WHERE ident = ?',
+			'data': [ item.human_name, item.payee.human_name, item.icon, type, item.machine_name ]
+		})
+	} else {
+		console.log( item.machine_name, "has no name")
 
-//	for ( var i = 0; i < obj.subproducts.length; i++ ) {
-//		var item = obj.subproducts[i];
-
-//		var types = parseDownload( item.machine_name, item.downloads )
-//		var object = db.transaction(function (tx) {
-//			var results = tx.executeSql(
-//				'REPLACE INTO LISTINGS (id, displayName, type) VALUES(?, ?, ?)',
-//				[item.machine_name, item.human_name, types])
-//		})
-//	}
-//}
+	}
+}
 
 function updateOrder( notification, orderid, ordercache ) {
 	var component = notification.addNotication("DownloadNotication.qml", { "url": ordercache }, function( content ){
@@ -164,14 +172,17 @@ function updateOrder( notification, orderid, ordercache ) {
 			var results = tx.executeSql(
 						'REPLACE INTO ORDERS (id, url, cache) VALUES(?, ?, ?)',
 						[orderid, ordercache, content])
+			notification.watchCount++
 		})
 	})
 }
 
 function updateOrders( notification, gamekeys )
 {
+
 	var gameOrderArray = JSON.parse(gamekeys);
 	if ( gameOrderArray.length ) {
+		notification.watchTotal = gameOrderArray.length
 		for( var value in gameOrderArray ) {
 			updateOrder(notification, gameOrderArray[value], "https://www.humblebundle.com/api/v1/order/" + gameOrderArray[value] )
 		}
@@ -179,17 +190,19 @@ function updateOrders( notification, gamekeys )
 }
 
 function parseOrders( notification, fullDownloadedPage ) {
-	var keyRegEx = /gamekeys: (\[[A-Za-z0-9\", ]*\])/
-	var startIndex = fullDownloadedPage.indexOf("new window.Gamelist(")
-	var endIndex = fullDownloadedPage.indexOf(");\n  \n});", startIndex)
-	var gameOrders = fullDownloadedPage.substring(startIndex + 10, endIndex).match(keyRegEx)
+	//var keyRegEx = /gamekeys: (\[[A-Za-z0-9\", ]*\])/
+
+	var keyRegEx = /var gamekeys =  (\[[A-Za-z0-9\", ]*\])/
+
+	var gameOrders = fullDownloadedPage.match(keyRegEx)
+
+	console.log(gameOrders);
 	if ( gameOrders !== null ) {
 		updateOrders( notification, gameOrders[1]);
 		return true
 	}
 	return false
 }
-
 
 function setUser( user ) {
 	database = "HumbleBundleItems-" . user

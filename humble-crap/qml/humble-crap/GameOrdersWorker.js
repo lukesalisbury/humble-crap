@@ -35,3 +35,6 @@ WorkerScript.onMessage = function(msg) {
 		msg.model.sync();
 	}
 }
+
+
+

@@ -30,16 +30,14 @@ Rectangle {
 	property int total: 0
 	property int count: 0
 
-
 	signal successful( string content )
 	signal error( string message )
-
 
 
 	Text {
 		id: text
 		color: "#ffffff"
-		text: qsTr("Text")
+		text: qsTr("")
 		verticalAlignment: Text.AlignVCenter
 		anchors.right: parent.right
 		anchors.rightMargin: 24
@@ -86,7 +84,7 @@ Rectangle {
 			from: "*"; to: "Removing"
 			NumberAnimation { properties: "opacity"; easing.type: Easing.OutCurve; duration: 1000; onRunningChanged: {
 					if (!running) {
-						console.log("Destroying...")
+
 					}
 				} }
 		}

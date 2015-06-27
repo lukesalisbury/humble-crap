@@ -21,42 +21,65 @@ import QtQuick 2.0
 
 import "GameDatabase.js" as GameDatabase
 
-
-ListModel {
-	property int updateCount: 0
-	property ParseNotication note: null
-
+Rectangle {
+	property int updateCount: 1
+	property ParseNotication notification
 	signal updateList
-	signal display( string page, int bits )
 	signal cancel
 
-	/**/
 
-
-	/* Signal */
-	onUpdateList: {
-		workerTimer.running = true
-		note = notifications.addNotication(
-					"ParseNotication.qml",
-					{ title: "Updating Database", count: 0, total: GameDatabase.queueSize() },
-					function (content) { pageMainWindow.display() }
-				)
+	function startTimer(content) {
+		databaseList.updateList();
 	}
 
+
+	Timer {
+		id: workerTimer
+		interval: 1
+		running: false
+		repeat: true
+		onTriggered: {
+			var messageObject = GameDatabase.queuePop()
+			if (messageObject) {
+				GameDatabase.runQuery(messageObject.action,  messageObject.query, messageObject.data)
+			} else {
+				running = false
+			}
+		}
+	}
+
+
+	WorkerScript {
+		id: parseWorker
+		source: "UpdateListWorker.js"
+
+		onMessage: {
+			if (messageObject.queries) {
+				for ( var i = 0; i < messageObject.queries.length; i++ ) {
+					GameDatabase.queueAdd( messageObject.queries[i] )
+				}
+			} else {
+				updateCount++;
+			}
+			notification.count = updateCount;
+		}
+	}
+	/* Signal */
 	onUpdateCountChanged: {
 		updateNotice.text = "Updates: " + updateCount
 	}
 
+	onUpdateList: {
+
+		var data = GameDatabase.getOrders( );
+		if ( data.length ) {
+			notification = notifications.addNotication( "ParseNotication.qml", { "title": "Updating Orders", "count": 0, "total": data.length}, startTimer );
+			parseWorker.sendMessage( {'GameDatabase': GameDatabase, 'data': data } )
+
+		}
+	}
+
 	onCancel: {
-		workerTimer.running = false
+
 	}
-
-
-	onDisplay: {
-		updateCount = 0;
-		var data = GameDatabase.getListing( page, bits );
-		gameWorker.sendMessage( {'action': 'updateList', 'model':this, 'data': data } )
-	}
-
-
 }

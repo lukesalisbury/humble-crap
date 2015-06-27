@@ -28,7 +28,6 @@ HumbleDownload::HumbleDownload(QObject *parent) :
 
 bool HumbleDownload::makeRequest()
 {
-	qDebug() << "makeRequest";
 	if ( !this->url.isEmpty() )
 	{
 		connect( &this->request, SIGNAL( downloadError(QString) ), this, SLOT( downloadError(QString)) );
