@@ -17,13 +17,43 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
+import QtQuick 2.0
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+import "../scripts/GameDatabase.js" as GameDatabase
 
-#define HUMBLEURL_PROCESSLOGIN "https://www.humblebundle.com/processlogin"
-#define HUMBLEURL_LIBRARY "https://www.humblebundle.com/home/library"
-#define HUMBLEURL_COOKIE "https://www.humblebundle.com/"
 
-#endif // GLOBAL_HPP
+ListModel {
+	property int updateCount: 0
+	property ParseNotication note: null
 
+	signal updateList
+	signal display( string page, int bits )
+	signal cancel
+
+
+
+	/* Signal */
+	onUpdateList: {
+		//workerTimer.running = true
+		note = notifications.addNotication(
+					"ParseNotication.qml",
+					{ title: "Updating Database", count: 0, total: GameDatabase.queueSize() },
+					function (content) { pageMainWindow.display() }
+				)
+	}
+
+	onUpdateCountChanged: {
+		//updateNotice.text = "Updates: " + updateCount
+	}
+
+	onCancel: {
+
+	}
+
+
+	onDisplay: {
+		updateCount = 0;
+	}
+
+
+}

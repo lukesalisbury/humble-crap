@@ -18,12 +18,42 @@
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#include "package-handling.hpp"
 
-#define HUMBLEURL_PROCESSLOGIN "https://www.humblebundle.com/processlogin"
-#define HUMBLEURL_LIBRARY "https://www.humblebundle.com/home/library"
-#define HUMBLEURL_COOKIE "https://www.humblebundle.com/"
 
-#endif // GLOBAL_HPP
+PackageHandling::PackageHandling(QObject *parent) :
+	QObject(parent)
+{
+}
 
+
+void PackageHandling::setFile(const QString &a)
+{
+
+	if (a != filename) {
+		filename = a;
+		selectSource();
+		emit fileChanged();
+	}
+}
+
+
+QString PackageHandling::file() const
+{
+	return filename;
+}
+
+bool PackageHandling::selectSource()
+{
+
+//	QString fileName = QFileDialog::getOpenFileName(NULL, tr("Open Downloaded Package"), QStandardPaths::writableLocation( QStandardPaths::DownloadLocation ), tr("Package Files (*.zip *.tar.gz *.tar.bz2)"));
+//	qDebug() << fileName;
+
+	return true;
+}
+
+bool PackageHandling::selectDestination()
+{
+
+return true;
+}

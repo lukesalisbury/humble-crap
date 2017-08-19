@@ -18,11 +18,11 @@
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
 
-#include "humblecrap.hpp"
-#include "packagehandling.hpp"
-#include "humbleuser.hpp"
-#include "humbledownload.hpp"
-#include "humblesystem.hpp"
+#include "humble-crap.hpp"
+#include "package-handling.hpp"
+#include "humble-user.hpp"
+#include "humble-download.hpp"
+#include "humble-system.hpp"
 
 #include <QtGui/QGuiApplication>
 #include <QtQml/QQmlContext>
@@ -33,8 +33,8 @@
 
 // Humble Bundle Content Retrieving APplication
 QNetworkAccessManager webManager;
-HumbleCrap * t;
-HumbleUser * user;
+HumbleCrap * humble_core;
+HumbleUser * humble_user;
 HumbleSystem * humble_system;
 
 QNetworkAccessManager * getNetworkManager()
@@ -52,17 +52,17 @@ int main(int argc, char *argv[])
 	QQuickWindow * window;
 	QGuiApplication app(argc, argv);
 	QQmlEngine engine;
-	QQmlComponent component(&engine, QUrl("../humble-crap/qml/humble-crap/main.qml") );
+	QQmlComponent component(&engine, QUrl("../humble-crap/qml/humble-crap/dialog/MainWindow.qml") );
 	QObject * object;
 
-	t = new HumbleCrap();
-	user = new HumbleUser();
+	humble_core = new HumbleCrap();
+	humble_user = new HumbleUser();
 	humble_system = new HumbleSystem();
 
 	app.connect( &engine, SIGNAL(quit()), SLOT(quit()) );
 
-	engine.rootContext()->setContextProperty("humbleCrap", t);
-	engine.rootContext()->setContextProperty("humbleUser", user);
+	engine.rootContext()->setContextProperty("humbleCrap", humble_core);
+	engine.rootContext()->setContextProperty("humbleUser", humble_user);
 	engine.rootContext()->setContextProperty("humbleSystem", humble_system);
 
 	if (!component.isReady())

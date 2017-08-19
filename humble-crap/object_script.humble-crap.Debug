@@ -1,0 +1,16 @@
+INPUT(
+./debug\main.o
+./debug\humble-crap.o
+./debug\humble-download.o
+./debug\humble-network.o
+./debug\humble-system.o
+./debug\humble-user.o
+./debug\package-handling.o
+./debug\humble-file.o
+./debug\moc_humble-crap.o
+./debug\moc_humble-download.o
+./debug\moc_humble-network.o
+./debug\moc_humble-system.o
+./debug\moc_humble-user.o
+./debug\moc_package-handling.o
+);

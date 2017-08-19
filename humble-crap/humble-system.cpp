@@ -17,13 +17,32 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
+#include "humble-system.hpp"
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+HumbleSystem::HumbleSystem(QObject *parent) :
+	QObject(parent)
+{
 
-#define HUMBLEURL_PROCESSLOGIN "https://www.humblebundle.com/processlogin"
-#define HUMBLEURL_LIBRARY "https://www.humblebundle.com/home/library"
-#define HUMBLEURL_COOKIE "https://www.humblebundle.com/"
+}
 
-#endif // GLOBAL_HPP
 
+QString HumbleSystem::getPlatform()  const
+{
+#if defined(Q_OS_OSX)
+	return "osx";
+#elif defined(Q_OS_LINUX)
+	return "linux";
+#elif defined(Q_OS_WIN32)
+	return "windows";
+#endif
+
+	return "other";
+}
+
+int HumbleSystem::getPlatformBits()  const
+{
+
+	return (int)QSysInfo::WordSize;
+
+
+}

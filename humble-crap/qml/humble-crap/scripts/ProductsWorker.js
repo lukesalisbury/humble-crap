@@ -18,12 +18,26 @@
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+WorkerScript.onMessage = function(msg) {
+	if ( msg.action === 'updateList' ) {
+		/* Display */
+		//msg.model.clear();
+		msg.model.sync();
+		for ( var i = 0; i < msg.data.length; i++ ) {
+			if ( msg.data[i].release > msg.data[i].installed )
+			{
+				WorkerScript.sendMessage({ 'action': 'update', 'id': msg.data[i].ident } )
+			}
+			//console.log(msg.data[i].product );
+			msg.model.append( msg.data[i] );
+			if ( (i%10) == 0 )
+				msg.model.sync();
+		}
 
-#define HUMBLEURL_PROCESSLOGIN "https://www.humblebundle.com/processlogin"
-#define HUMBLEURL_LIBRARY "https://www.humblebundle.com/home/library"
-#define HUMBLEURL_COOKIE "https://www.humblebundle.com/"
+	}
 
-#endif // GLOBAL_HPP
+	msg.model.sync();
+}
+
+
 
