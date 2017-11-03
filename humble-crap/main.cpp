@@ -65,6 +65,8 @@ int main(int argc, char *argv[])
 	engine.rootContext()->setContextProperty("humbleUser", humble_user);
 	engine.rootContext()->setContextProperty("humbleSystem", humble_system);
 
+    humble_user->setUser("dummy");
+
 	if (!component.isReady())
 	{
 		qWarning("%s", qPrintable(component.errorString()));

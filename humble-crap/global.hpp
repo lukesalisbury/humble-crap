@@ -21,9 +21,11 @@
 #ifndef GLOBAL_HPP
 #define GLOBAL_HPP
 
-#define HUMBLEURL_PROCESSLOGIN "https://www.humblebundle.com/processlogin"
-#define HUMBLEURL_LIBRARY "https://www.humblebundle.com/home/library"
+#define HUMBLEURL_PROCESSLOGIN "https://www.humblebundle.com/processlogin?ajax=true"
+#define HUMBLEURL_LIBRARY "https://www.humblebundle.com/home/library?ajax=true"
 #define HUMBLEURL_COOKIE "https://www.humblebundle.com/"
+#define HUMBLEURL_CAPTCHA "https://www.humblebundle.com/user/captcha"
+#define HUMBLEURL_LOGIN "https://www.humblebundle.com/login?ajax=true"
 
 #endif // GLOBAL_HPP
 

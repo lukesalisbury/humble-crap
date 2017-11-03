@@ -29,7 +29,7 @@
  */
 HumbleUser::HumbleUser(QObject *parent)
 {
-
+    currentCaptcha = "";
 
 }
 
@@ -50,10 +50,15 @@ void HumbleUser::setUser(QString email)
 		connect( &request, SIGNAL(requestError(QString)), this, SLOT(ordersRejected(QString)) );
 
 		request.makeRequest( QUrl(HUMBLEURL_LIBRARY) );
-	}
+    } else {
+
+    }
 
 }
+void HumbleUser::setCaptcha(QString challenge, QString response) {
 
+    currentCaptcha = response;
+}
 
 /**
  * @brief HumbleUser::login
@@ -86,9 +91,11 @@ void HumbleUser::login( QString email, QString password, QString pin  )
 	/* POST */
 	request.appendPost("_le_csrf_token", getCsrfValue());
 	request.appendPost("goto", "#");
-	request.appendPost("submit-data", "");
+    //request.appendPost("submit-data", "");
 	request.appendPost("authy-token", pin);
-	request.appendPost("script-wrapper", "true");
+    request.appendPost("script-wrapper", "true");
+    request.appendPost("recaptcha_challenge_field", "");
+    request.appendPost("recaptcha_response_field", currentCaptcha);
 
 	request.appendPost("qs", "");
 	request.appendPost("username", email );
@@ -216,21 +223,28 @@ void HumbleUser::loginReturned( QByteArray content )
  */
 void HumbleUser::loginError( QString errorMessage )
 {
+    //HUMBLEURL_CAPTCHA
+
+
 	disconnect( &request, SIGNAL(requestSuccessful(QByteArray)), NULL, NULL);
 	disconnect( &request, SIGNAL(requestError(QString)), NULL, NULL );
 	this->errorMessage = errorMessage;
-
-	emit appError();
+    if (errorMessage == "Host requires authentication" )
+    {
+        emit captchaRequired();
+    }
+    else {
+        emit appError();
+    }
 }
 
 QString HumbleUser::getCsrfValue()
 {
 	QString value;
-	//QNetworkCookieJar * cookies = request.getCookies();
+    //QNetworkCookieJar * cookies = request.getCookies();
 	QList<QNetworkCookie> list = cookies->cookiesForUrl( QUrl(HUMBLEURL_COOKIE) );
 
-	qDebug() << "cookies:" << quint32(list.size());
-	qDebug() << "List" << list;
+
 	for (int i = 0; i < list.size(); ++i)
 	{
 		if ( list.at(i).name() == "csrf_cookie" )

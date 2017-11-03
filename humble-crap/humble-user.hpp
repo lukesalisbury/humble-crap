@@ -41,7 +41,12 @@ public:
 	Q_INVOKABLE QString getUser();
 
 	Q_INVOKABLE void setUser(QString email);
-	signals:
+    Q_INVOKABLE void setCaptcha(QString challenge, QString response);
+
+
+
+
+signals:
 	void appError();
 	void appSuccess();
 
@@ -49,19 +54,24 @@ public:
 	void orderSuccess();
 
 	void loginRequired();
+    void captchaRequired();
 
 public slots:
+
 	void loginReturned( QByteArray content );
 	void loginError( QString errorMessage );
 
 	void ordersReturned( QByteArray content );
 	void ordersError( QString errorMessage );
 	void ordersRejected(QString errorMessage);
+
+
 protected:
 	LocalCookieJar * cookies;
 	HumbleNetworkRequest request;
 	QString currentPassword;
 	QString currentUser;
+    QString currentCaptcha;
 	QByteArray pageContent;
 
 

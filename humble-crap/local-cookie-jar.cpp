@@ -8,7 +8,9 @@
 
 LocalCookieJar::LocalCookieJar(QString user)
 {
+    QDir dir;
 	QString path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    dir.mkpath(path);
 	cookie_path = QDir(path).filePath("cookiejar-" + user);
 
 	this->LoadFromDisk();

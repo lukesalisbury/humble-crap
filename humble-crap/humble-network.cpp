@@ -83,7 +83,7 @@ QByteArray gUncompress(const QByteArray &data)
 void HumbleNetworkRequest::getToken()
 {
 	connect( this, SIGNAL(requestSuccessful(QByteArray)), this, SLOT(finishRequestCookies(QByteArray)));
-	this->makeRequest( QUrl("https://www.humblebundle.com/login") );
+    this->makeRequest( QUrl(HUMBLEURL_LOGIN) );
 }
 
 HumbleNetworkRequest::HumbleNetworkRequest() : cookiesRetrieved(0)
@@ -157,11 +157,22 @@ bool HumbleNetworkRequest::makeRequest( QUrl url )
 	{
 
 		QNetworkRequest request;
+
+
+        //request.setHeader(QNetworkRequest::CookieHeader, &this->webManager->cookieJar()->allCookies());
 		request.setRawHeader("User-Agent", "Humble-bundle Content Retrieving APplication");
 		request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 		request.setRawHeader("Accept-Encoding", "gzip,deflate,qcompress" );
+        //request.setRawHeader("Accept", "application/json" );
+        request.setRawHeader("X-Requested-By", "hb_android_app" );
 		request.setRawHeader("Referer", "http://github.org/lukesalisbury/humble-crap" );
+        request.setRawHeader("origin", HUMBLEURL_COOKIE);
+
+
 		request.setUrl( url );
+
+
+
 
 		connect( this->webManager, SIGNAL( finished(QNetworkReply*) ), this, SLOT( finishRequest(QNetworkReply*)) );
 
@@ -200,9 +211,6 @@ void HumbleNetworkRequest::finishRequestCookies(QByteArray content)
 {
 	QNetworkCookieJar * cookies = this->webManager->cookieJar();
 	QList<QNetworkCookie> list = cookies->cookiesForUrl( QUrl(HUMBLEURL_COOKIE) );
-
-	qDebug() << "cookies:" << quint32(list.size());
-	qDebug() << "List" << content;
 
 	cookiesRetrieved = true;
 
@@ -249,7 +257,7 @@ void HumbleNetworkRequest::finishRequest( QNetworkReply* pReply )
 
 		if ( pReply->error() )
 		{
-			qDebug() << tr("Download failed: %1.").arg(pReply->errorString());
+            qDebug() << tr("Download failed: %1.").arg(pReply->errorString());
 			this->errorMessage = pReply->errorString();
 			emit requestError( this->errorMessage );
 

@@ -36,6 +36,7 @@ Rectangle {
 	height: 200
 	anchors.fill: parent
 
+
 	MouseArea {
 		id: mousearea1
 		anchors.fill: parent
@@ -134,7 +135,6 @@ Rectangle {
 					anchors.topMargin: 2
 					anchors.fill: parent
 					echoMode: TextInput.Password
-					KeyNavigation.tab: inputSavePass
 					Keys.onReturnPressed: {
 						buttonLogon.clicked()
 					}
@@ -303,6 +303,11 @@ Rectangle {
 				buttonLogon.enabled = true
 				textMessage.text = humbleUser.getErrorMessage()
 			}
+            onCaptchaRequired: {
+                buttonLogon.enabled = true
+                textMessage.text = "Captcha Missing"
+                Qt.createComponent("CaptchaDialog.qml").createObject(pageLogin, { })
+            }
 			onLoginRequired: {
 				buttonLogon.enabled = true
 				textMessage.text = ''
@@ -311,13 +316,14 @@ Rectangle {
 			onAppSuccess: {
 				console.log("logged in")
 
-				GameDatabase.setUser(humbleCrap.getUser())
+                GameDatabase.setUser(humbleCrap.getUsername())
 				humbleUser.updateOrders()
 				pageLogin.destroy()
 			}
 		}
 		Component.onCompleted: {
-			user = humbleCrap.getUsername()
+            console.log(humbleCrap.getUsername())
+            var user = humbleCrap.getUsername()
 			humbleUser.setUser(user)
 		}
 	}
