@@ -1,5 +1,6 @@
 *.o
 *.user
+*.pro.user
 *.user.*
 build-*
 #################
