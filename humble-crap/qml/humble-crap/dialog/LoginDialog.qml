@@ -308,13 +308,18 @@ Rectangle {
                 textMessage.text = "Captcha Missing"
                 Qt.createComponent("CaptchaDialog.qml").createObject(pageLogin, { })
             }
+            onGuardRequired: {
+                buttonLogon.enabled = true
+                textMessage.text = "New Browser"
+                Qt.createComponent("CaptchaDialog.qml").createObject(pageLogin, { })
+            }
 			onLoginRequired: {
 				buttonLogon.enabled = true
 				textMessage.text = ''
 			}
 
 			onAppSuccess: {
-				console.log("logged in")
+                console.log("Logged in")
 
                 GameDatabase.setUser(humbleCrap.getUsername())
 				humbleUser.updateOrders()
@@ -322,7 +327,6 @@ Rectangle {
 			}
 		}
 		Component.onCompleted: {
-            console.log(humbleCrap.getUsername())
             var user = humbleCrap.getUsername()
 			humbleUser.setUser(user)
 		}

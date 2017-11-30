@@ -63,7 +63,6 @@ bool HumbleDownload::writeContent( QString localFile )
 	QFile f(path + "/" + localFile );
 	f.open( QIODevice::ReadOnly );
 	data = f.readAll();
-
 	f.close();
 
 	return true;
@@ -88,8 +87,6 @@ QString HumbleDownload::getError()
 QString HumbleDownload::getUrlFile()
 {
 	QUrl address = QUrl(this->url);
-
-
 	return address.path();
 }
 

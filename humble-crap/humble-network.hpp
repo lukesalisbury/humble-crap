@@ -27,6 +27,7 @@
 #include <QtCore>
 #include <QNetworkCookieJar>
 #include <QNetworkCookie>
+#include "local-cookie-jar.hpp"
 
 
 class HumbleNetworkRequest : public QObject

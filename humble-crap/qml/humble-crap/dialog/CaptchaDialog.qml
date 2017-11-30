@@ -65,7 +65,7 @@ $('input[type=submit]').click(function(e){
 
             if (message.startsWith('humblecrap')) {
                 var cap = message.split(' ')
-                console.log(cap)
+
                 if (cap.length == 2 )
                 {
                     humbleUser.setCaptcha('', cap[1])

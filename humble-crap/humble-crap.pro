@@ -75,5 +75,6 @@ DISTFILES += \
     qml/humble-crap/dialog/ItemDialog.qml \
     qml/humble-crap/dialog/WebDialog.qml \
     qml/humble-crap/game/GameDialog.qml \
-    qml/humble-crap/dialog/CaptchaDialog.qml
+    qml/humble-crap/dialog/CaptchaDialog.qml \
+    qml/humble-crap/dialog/GuardDialog.qml
 

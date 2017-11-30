@@ -38,8 +38,8 @@ Window {
 	title: "Humble Crap"
 
 	id: pageMainWindow
-	width: 600
-	height: 400
+    width: 760
+    height: 560
 	color: "#FFFFFF"
 
 	property string page: "games"

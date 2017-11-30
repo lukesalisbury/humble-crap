@@ -43,7 +43,7 @@ public:
 	Q_INVOKABLE void setUser(QString email);
     Q_INVOKABLE void setCaptcha(QString challenge, QString response);
 
-
+    Q_INVOKABLE void setHumbleGuard(QString pin);
 
 
 signals:
@@ -55,6 +55,7 @@ signals:
 
 	void loginRequired();
     void captchaRequired();
+    void guardRequired();
 
 public slots:
 

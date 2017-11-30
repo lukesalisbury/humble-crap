@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 	engine.rootContext()->setContextProperty("humbleUser", humble_user);
 	engine.rootContext()->setContextProperty("humbleSystem", humble_system);
 
-    humble_user->setUser("dummy");
+    humble_user->setUser(humble_core->getUsername());
 
 	if (!component.isReady())
 	{

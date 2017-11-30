@@ -11,6 +11,7 @@ class LocalCookieJar : public QNetworkCookieJar
 		void SaveToDisk();
 		void LoadFromDisk();
 
+        bool setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url);
 	private:
 		QString cookie_path;
 };

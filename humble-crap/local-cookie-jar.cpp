@@ -16,6 +16,13 @@ LocalCookieJar::LocalCookieJar(QString user)
 	this->LoadFromDisk();
 }
 
+bool LocalCookieJar::setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url) {
+
+    QNetworkCookieJar::setCookiesFromUrl(cookieList, url);
+    this->SaveToDisk();
+    return true;
+}
+
 void LocalCookieJar::SaveToDisk() {
 
 	QFile file(cookie_path);
@@ -53,6 +60,6 @@ void LocalCookieJar::LoadFromDisk() {
 
 	this->setAllCookies(cookies);
 
-	qDebug() << "cookies:" << quint32(cookies.size());
-	qDebug() << "List" << cookies;
+    //qDebug() << "cookies:" << quint32(cookies.size());
+    //qDebug() << "List" << cookies;
 }

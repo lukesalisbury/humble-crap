@@ -60,6 +60,11 @@ void HumbleUser::setCaptcha(QString challenge, QString response) {
     currentCaptcha = response;
 }
 
+void HumbleUser::setHumbleGuard(QString pin)
+{
+
+}
+
 /**
  * @brief HumbleUser::login
  * @param email
@@ -168,7 +173,6 @@ void HumbleUser::updateOrders()
  */
 void HumbleUser::ordersReturned( QByteArray content )
 {
-	qDebug() << "ordersReturned:";
 	disconnect( &request, SIGNAL(requestSuccessful(QByteArray)), NULL, NULL);
 	disconnect( &request, SIGNAL(requestError(QString)), NULL, NULL );
 	pageContent = content;
@@ -241,9 +245,7 @@ void HumbleUser::loginError( QString errorMessage )
 QString HumbleUser::getCsrfValue()
 {
 	QString value;
-    //QNetworkCookieJar * cookies = request.getCookies();
 	QList<QNetworkCookie> list = cookies->cookiesForUrl( QUrl(HUMBLEURL_COOKIE) );
-
 
 	for (int i = 0; i < list.size(); ++i)
 	{
