@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -20,117 +20,126 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
 
-import "../scripts/FontAwesome.js" as FontAwesome
 
 Rectangle {
-	id: button
-	property alias name: textName.text
-	property string action: "Windows"
-	property alias icon: textIcon.text
+    id: button
+    width: 120
+    height: 24
+    color: "#00000000"
+    radius: 0
+    clip: false
+    border.width: 0
 
-	signal clicked
-	width: 120
-	height: 24
-	color: "#80a03131"
-	radius: 0
-	clip: false
-	border.width: 0
+    property alias name: textName.text
+    property string action: "Windows"
+	property bool active: false
 
-	MouseArea {
-		id: mouseArea1
-		height: 48
-		anchors.fill: parent
-		hoverEnabled: true
-		onClicked: button.clicked()
-		onEntered: {
-			parent.state = 'hover'
-		}
-		onExited: {
-			parent.state = ' '
-		}
+    signal clicked
 
-		Text {
-			id: textName
-			color: "#ffffff"
-			text: "Windows"
-			font.bold: true
-			font.pointSize: 10
-			anchors.horizontalCenter: parent.horizontalCenter
+    MouseArea {
+        id: mouseArea1
+
+        anchors.fill: parent
+        hoverEnabled: true
+        onClicked: button.clicked()
+        onEntered: {
+			parent.state = button.active ? 'hover active' : 'hover'
+        }
+        onExited: {
+			parent.state = button.active ? 'active' : ' '
+        }
+
+        Text {
+            id: textName
+            color: "#ffffff"
+            text: "Windows"
+            font.bold: true
+            font.pointSize: 10
+            anchors.horizontalCenter: parent.horizontalCenter
 			anchors.verticalCenter: parent.verticalCenter
 			horizontalAlignment: Text.AlignHCenter
 		}
-		DropShadow {
-			radius: 2
-			transparentBorder: false
-			verticalOffset: 2
-			horizontalOffset: 2
-			samples: 8
-			cached: true
-			fast: true
-			source: textName
-		}
 
-		Text {
-			id: textIcon
-			x: 14
-			y: 18
-			color: "#ffffff"
-			text: FontAwesome.platform.Windows
-			font.pointSize: 12
-			anchors.verticalCenter: textName.verticalCenter
-			anchors.right: textName.left
-			anchors.rightMargin: 2
-			font.family: FontAwesome.family
+		Rectangle {
+			id: boxBorder
+			height: 2
+			color: "#1e1e1e"
+			anchors.right: parent.right
+			anchors.rightMargin: 0
+			anchors.left: parent.left
+			anchors.leftMargin: 0
+			anchors.bottom: parent.bottom
+			anchors.bottomMargin: 0
+			opacity: 0
 		}
 	}
 	states: [
 		State {
 			name: "hover"
-
-			PropertyChanges {
-				target: button
-				color: "#000000"
+            PropertyChanges {
+                target: textName
+                font.bold: true
 			}
 
 			PropertyChanges {
-				target: textIcon
+				target: boxBorder
 				color: "#ffffff"
+				opacity: 1
+			}
+        },
+        State {
+            name: "active"
+            PropertyChanges {
+                target: textName
+                font.bold: true
 			}
 
 			PropertyChanges {
-				target: textName
-				font.bold: true
-				font.pointSize: 10
-   }
-		},
-		State {
-			name: "active"
-			PropertyChanges {
+				target: boxBorder
+				color: "#003300"
+				opacity: 1
 			}
-
-			PropertyChanges {
-				target: textName
-				color: "#000000"
-				font.bold: true
-				font.pointSize: 10
-			}
-
-			PropertyChanges {
-				target: button
-				color: "#ffffff"
-   }
 		}
-	]
+    ]
+
 	Transition {
 		from: " "
 		to: "hover"
 		SequentialAnimation {
 			NumberAnimation {
-				target: rectangle2
+				target: button
 				easing.type: Easing.InQuad
 				properties: "opacity"
 				duration: 200
 			}
+		}
+	}
+	Transition {
+		from: "active"
+		to: ""
+		SequentialAnimation {
+			NumberAnimation {
+				target: button
+				easing.type: Easing.InQuad
+				properties: "opacity"
+				duration: 200
+			}
+		}
+	}
+	Transition {
+		from: "active"
+		to: "hover"
+		ColorAnimation {
+			target: rectangle
+			duration: 200
+		}
+	}
+	Transition {
+		from: "active"
+		to: "hover"
+		ColorAnimation {
+			target: rectangle
+			duration: 200
 		}
 	}
 }

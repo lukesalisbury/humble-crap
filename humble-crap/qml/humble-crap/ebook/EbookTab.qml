@@ -1,14 +1,11 @@
 import QtQuick 2.0
 
 ListView {
-	anchors.top: parent.top
-	anchors.left: parent.left
-	anchors.right: parent.right
-	anchors.bottom: parent.bottom
 	snapMode: ListView.SnapToItem
 	visible: true
 	boundsBehavior: Flickable.StopAtBounds
-
+	height: parent.height
+	width: parent.width
 	delegate: EbookListItem {
 		dbProduct: product
 		dbAuthor: author

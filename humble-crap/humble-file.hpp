@@ -5,10 +5,8 @@
 
 class HumbleFile
 {
-public:
-	HumbleFile();
-
-
+    public:
+        HumbleFile();
 
 };
 

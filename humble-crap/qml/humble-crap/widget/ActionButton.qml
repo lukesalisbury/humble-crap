@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -22,32 +22,25 @@ import QtGraphicalEffects 1.0
 
 Item {
 	id: container
+
 	property string text: "ACTION"
-	property string databaseIdent: ""
-	property string url: ""
 	property color colour: "#FFFFFF"
 	property color background: "#00acc1"
 	property int fontSize: 10
+	property bool active: true
 
 	signal clicked
 
-	antialiasing: true
 
 	width: 64
 	height: 20
 
-	function go() {
-		console.log("download", url)
-	}
 
 	Rectangle {
-		id: rectangle1
-
-		radius: 0
-		border.width: 0
-		border.color: "#000000"
+		id: rectangleBox
 		anchors.fill: parent
-		color: container.background
+		color: active ? background: Qt.tint(background, 'gray')
+
 		Text {
 			id: text1
 			color: container.colour
@@ -60,9 +53,7 @@ Item {
 		}
 
 		MouseArea {
-			id: mousearea1
-			x: 0
-			y: 0
+			id: mouseBox
 			anchors.rightMargin: 0
 			anchors.bottomMargin: 0
 			anchors.leftMargin: 0
@@ -71,43 +62,37 @@ Item {
 			anchors.fill: parent
 			onPressed: container.state = "clicked"
 			onReleased: container.state = ""
-			onClicked: container.clicked()
+			onClicked: {
+				if ( active ) {
+					container.clicked()
+				}
+			}
 			onEntered: container.state = "hover"
 			onExited:  container.state = ""
 		}
 	}
-	DropShadow {
-		anchors.fill: rectangle1
-		horizontalOffset: 2
-		verticalOffset: 2
-		radius: 4
-		cached: true
-		samples: 8
-		color: "#80000000"
-		source: rectangle1
-	}
 
-
-
+	// States
 	states: [
 		State {
 			name: "clicked"
 
 			PropertyChanges {
-				target: rectangle1
+				target: rectangleBox
 				anchors.rightMargin: -1
 				anchors.bottomMargin: -1
 				anchors.leftMargin: 1
 				anchors.topMargin: 1
+				color: Qt.lighter( active ? background: Qt.tint(background, 'gray'), 1.5)
 			}
 		},
 		State {
 			name: "hover"
 
 			PropertyChanges {
-				target: rectangle1
-				color: "#05343a"
-	  }
-  }
+				target: rectangleBox
+				color: Qt.darker(active ? background: Qt.tint(background, 'gray'), 1.5)
+			}
+		}
 	]
 }

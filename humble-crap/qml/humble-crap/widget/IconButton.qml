@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -20,16 +20,17 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
 
-import "../scripts/FontAwesome.js" as FontAwesome
 
 Item {
 	id: container
-	property string text: FontAwesome.icon.Refresh
+	property string text: '🔄'
 	property string databaseIdent: ""
 	property string url: ""
+	property string title: " Unlabeled"
 	property color colour: "#FFFFFF"
+	property color hoverBackground: "#05343a"
 	property color background: "#00acc1"
-	property int fontSize: 10
+
 
 	signal clicked
 
@@ -37,10 +38,6 @@ Item {
 
 	width: 24
 	height: 24
-
-	FontLoader {
-		source: FontAwesome.file
-	}
 
 	Rectangle {
 		id: rectangle1
@@ -59,8 +56,6 @@ Item {
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.top: parent.top
 			textFormat: Text.PlainText
-			font.pixelSize: 8
-			font.family: FontAwesome.family
 			verticalAlignment: Text.AlignVCenter
 			horizontalAlignment: Text.AlignHCenter
 			font.bold: true
@@ -80,7 +75,7 @@ Item {
 			onReleased: container.state = ""
 			onClicked: container.clicked()
 			onEntered: container.state = "hover"
-			onExited:  container.state = ""
+			onExited: container.state = ""
 		}
 	}
 	DropShadow {
@@ -95,7 +90,29 @@ Item {
 		source: rectangle1
 	}
 
+	Rectangle {
+		id: rectangle
+		x: 24
+		y: 0
+		width: 64
+		height: 24
+		color: container.hoverBackground
+		opacity: 0
 
+		Text {
+			id: text2
+			color: container.colour
+			text: container.title
+			anchors.verticalCenter: parent.verticalCenter
+			font.pixelSize: 12
+			opacity: 0
+							anchors.bottomMargin: 6
+				anchors.topMargin: 0
+				horizontalAlignment: Text.AlignLeft
+				verticalAlignment: Text.AlignVCenter
+				anchors.leftMargin: 0
+		}
+	}
 
 	states: [
 		State {
@@ -114,8 +131,19 @@ Item {
 
 			PropertyChanges {
 				target: rectangle1
-				color: "#05343a"
-	  }
-  }
+				color: container.hoverBackground
+			}
+
+			PropertyChanges {
+				target: rectangle
+				opacity: 1
+			}
+
+			PropertyChanges {
+				target: text2
+
+				opacity: 1
+			}
+		}
 	]
 }

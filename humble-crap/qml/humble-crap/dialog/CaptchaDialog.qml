@@ -1,17 +1,23 @@
-import QtQuick 2.0
-import QtWebEngine 1.5
+//Mingw doesn't support QtWebEngine
+item {
 
-Rectangle {
+}
+
+
+/*
+import QtQuick 2.0
+import QtWebEngine 1.3
+import QtQuick.Window 2.3
+import QtQuick.Controls 1.4
+
+ApplicationWindow {
     id: pageCaptcha
     color: "#60000000"
     opacity: 1
-    z: 1
-    x: 0
-    y: 0
-    width: 320
-    height: 200
-    anchors.fill: parent
-
+    width: 600
+    height: 400
+    visible: true
+    title: "Please complete this captcha"
     Rectangle {
         id: rectangle
         width: 200
@@ -44,10 +50,10 @@ Rectangle {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        url: "https://www.humblebundle.com/user/captcha"
+		url: "https://www.humblebundle.com/user/captcha"
 
         onLoadingChanged: function (loadRequest) {
-            if (loadRequest.status == WebEngineView.LoadSucceededStatus) {
+			if (loadRequest.status === WebEngineView.LoadSucceededStatus) {
                 runJavaScript(
                             "
 $('input[type=submit]').click(function(e){
@@ -66,7 +72,7 @@ $('input[type=submit]').click(function(e){
             if (message.startsWith('humblecrap')) {
                 var cap = message.split(' ')
 
-                if (cap.length == 2 )
+				if (cap.length === 2 )
                 {
                     humbleUser.setCaptcha('', cap[1])
                     humbleUser.login(inputUser.text, inputPassword.text,
@@ -78,3 +84,4 @@ $('input[type=submit]').click(function(e){
         }
     }
 }
+*/

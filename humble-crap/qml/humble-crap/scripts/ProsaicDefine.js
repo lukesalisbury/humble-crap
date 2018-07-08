@@ -1,0 +1,7 @@
+var DIS = {
+	UNKNOWN: -1,
+	INACTIVE: 0,
+	ACTIVE: 1,
+	COMPLETED: 2
+}
+

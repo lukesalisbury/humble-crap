@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2018 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -18,6 +18,10 @@
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
 #include "humble-system.hpp"
+#include <QDesktopServices>
+#include <QUrl>
+/* Provide System Information */
+
 
 HumbleSystem::HumbleSystem(QObject *parent) :
 	QObject(parent)
@@ -41,8 +45,7 @@ QString HumbleSystem::getPlatform()  const
 
 int HumbleSystem::getPlatformBits()  const
 {
-
 	return (int)QSysInfo::WordSize;
-
-
 }
+
+

@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -21,7 +21,6 @@ import QtQuick 2.0
 import QtQuick.XmlListModel 2.0
 import QtQuick.LocalStorage 2.0
 import QtQuick.Window 2.0
-import Crap.Humble.Download 1.0
 
 import "../asmjs"
 import "../audio"
@@ -30,17 +29,24 @@ import "../ebook"
 import "../game"
 import "../widget"
 
-import "../scripts/GameDatabase.js" as GameDatabase
-import "../scripts/FontAwesome.js" as FontAwesome
+import "../scripts/CrapDatabase.js" as CrapDatabase
+import "../scripts/CrapOrders.js" as CrapOrders
+import "../scripts/CrapCode.js" as Code
 
 Rectangle {
-	id: rectangle2
+	id: baseWidget
+
+	property string page: "games"
+	property string platform: "windows"
+	property NotificationArea notication: windowNotifications
+
+
 	/* UI */
 	Rectangle {
 		id: boxTitle
 		z: 1
-		height: 64
-		color: "#607d8b"
+		height: 80
+		color: "#1b5e20"
 		enabled: true
 		border.width: 0
 		opacity: 1
@@ -53,126 +59,138 @@ Rectangle {
 		anchors.rightMargin: 0
 		Text {
 			id: textTitle
-			y: 0
-			width: 161
+			width: 166
 			height: 29
 			color: "#ffffff"
 			text: qsTr("Humble Crap")
+			anchors.top: parent.top
+			anchors.topMargin: 8
+			font.family: "Verdana"
 			verticalAlignment: Text.AlignVCenter
 			font.pixelSize: 18
 			enabled: false
-			horizontalAlignment: Text.AlignHCenter
+			horizontalAlignment: Text.AlignLeft
 			font.bold: true
 			anchors.left: parent.left
-			anchors.leftMargin: 0
+			anchors.leftMargin: 8
 		}
 		Text {
 			id: textSubTitle
 			x: 0
-			y: 9
-			width: 193
+			width: 275
 			height: 14
 			color: "#ffffff"
-			text: qsTr("Content Retrieving Application")
+			text: qsTr("Humble Bundle Content Retrieving Application")
+			anchors.top: textTitle.bottom
+			anchors.topMargin: -8
+			font.family: "Verdana"
 			verticalAlignment: Text.AlignVCenter
-			horizontalAlignment: Text.AlignHCenter
-			anchors.left: textTitle.right
-			anchors.leftMargin: 6
-			font.pixelSize: 12
+			horizontalAlignment: Text.AlignLeft
+			anchors.left: parent.left
+			anchors.leftMargin: 8
+			font.pixelSize: 9
+		}
+		ActionButton {
+			x: 568
+			text: "Exit"
+			anchors.right: parent.right
+			anchors.rightMargin: 8
+			anchors.top: parent.top
+			anchors.topMargin: 8
+			onClicked: {
+				Qt.quit()
+			}
 		}
 
-		Row {
-			id: menurow
-			height: 26
-			transformOrigin: Item.Bottom
-			anchors.right: parent.right
-			anchors.rightMargin: 0
+		Rectangle {
+			id: boxMenu
+			height: 24
+			color: "#4c8c4a"
 			anchors.left: parent.left
 			anchors.leftMargin: 0
+			anchors.right: parent.right
+			anchors.rightMargin: 0
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: 0
-			spacing: 2
-			CategoryButton {
-				id: categoryGames
-				name: "Games"
+
+			Row {
+				id: menurow
+				x: 154
+				y: -2
+				height: 26
+				layoutDirection: Qt.LeftToRight
+				transformOrigin: Item.Bottom
+				anchors.right: parent.right
+				anchors.rightMargin: 0
 				anchors.bottom: parent.bottom
 				anchors.bottomMargin: 0
-				action: "games"
-				icon: FontAwesome.platform.Windows
-				onClicked: {
-					setActiveList(action)
+				spacing: 2
+				CategoryButton {
+					id: categoryGames
+					name: "Games"
+					anchors.bottom: parent.bottom
+					anchors.bottomMargin: 0
+					action: "games"
+					onClicked: {
+						setActiveList(action)
+						this.state = 'active'
+					}
 				}
-			}
-			CategoryButton {
-				id: categoryAudio
-				name: "Audio"
-				anchors.bottom: parent.bottom
-				anchors.bottomMargin: 0
-				action: "audio"
-				icon: FontAwesome.icon.PlayCircle
-				onClicked: {
-					setActiveList(action)
+				CategoryButton {
+					id: categoryAudio
+					name: "Audio"
+					anchors.bottom: parent.bottom
+					anchors.bottomMargin: 0
+					action: "audio"
+					onClicked: {
+						setActiveList(action)
+					}
 				}
-			}
-			CategoryButton {
-				id: categoryEbook
-				name: "Ebook"
-				anchors.bottom: parent.bottom
-				anchors.bottomMargin: 0
-				action: "ebook"
-				icon: FontAwesome.icon.Book
-				onClicked: {
-					setActiveList(action)
+				CategoryButton {
+					id: categoryEbook
+					name: "E-Books"
+					anchors.bottom: parent.bottom
+					anchors.bottomMargin: 0
+					action: "ebook"
+					onClicked: {
+						setActiveList(action)
+					}
 				}
-			}
-			CategoryButton {
-				id: categoryASMJS
-				name: "ASM.js"
-				anchors.bottom: parent.bottom
-				anchors.bottomMargin: 0
-				action: "asmjs"
-				icon: FontAwesome.icon.Gamepad
-				onClicked: {
-					setActiveList(action)
+				CategoryButton {
+					id: categoryASMJS
+					name: "ASM.js"
+					anchors.bottom: parent.bottom
+					anchors.bottomMargin: 0
+					action: "asmjs"
+					onClicked: {
+						setActiveList(action)
+					}
+				}
+				CategoryButton {
+					id: categoryTrove
+					name: "Trove"
+					anchors.bottom: parent.bottom
+					anchors.bottomMargin: 0
+					action: "trove"
+					onClicked: {
+						setActiveList(action)
+					}
 				}
 			}
 		}
 
-		ActionButton {
-			id: actionButton1
-			text: "Exit"
-			anchors.top: parent.top
-			anchors.topMargin: 6
-			anchors.right: parent.right
-			anchors.rightMargin: 6
-
-
-			onClicked: {
-				pageMainWindow.quitProgram()
-			}
-		}
-
-		ActionButton {
-			id: actionButton2
-			text: "Settings"
-			anchors.top: parent.top
-			anchors.topMargin: 6
-			anchors.rightMargin: 6
-			anchors.right: actionButton1.left
-			onClicked: {
-				Qt.createComponent("SettingDialog.qml").createObject( pageMainWindow, {	} )
-			}
-		}
 	}
 
 	Flow {
 		id: boxItem
+		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 0
 		anchors.top: boxTitle.bottom
-		anchors.right: parent.right
-		anchors.bottom: boxFooter.top
-		anchors.left: parent.left
 		anchors.topMargin: 0
+		anchors.right: parent.right
+		anchors.rightMargin: 0
+		anchors.left: boxFooter.right
+		anchors.leftMargin: 0
 
 		GameTab {
 			id: boxGame
@@ -194,16 +212,30 @@ Rectangle {
 			visible: false
 			model: asmjsDatabaseList
 		}
+		AsmjsTab {
+			id: boxTrove
+			visible: false
+			model: troveDatabaseList
+		}
+	}
+
+	NotificationArea {
+		id: windowNotifications
+		anchors.fill: boxItem
+		anchors.rightMargin: 24
+		anchors.leftMargin: 24
+		anchors.bottomMargin: 0
+
 	}
 
 	Rectangle {
 		id: boxFooter
-		y: 0
-		height: 32
-		color: "#43444a"
+		width: 40
+		height: 0
+		color: "#424242"
+		anchors.top: boxTitle.bottom
+		anchors.topMargin: 0
 		transformOrigin: Item.Bottom
-		anchors.right: parent.right
-		anchors.rightMargin: 0
 		anchors.left: parent.left
 		anchors.leftMargin: 0
 		anchors.bottom: parent.bottom
@@ -211,78 +243,140 @@ Rectangle {
 
 		IconButton {
 			id: buttonRefresh
-			anchors.left: parent.left
-			anchors.leftMargin: 6
-			anchors.verticalCenter: parent.verticalCenter
+			title: 'Refresh'
+			width: 24
+			height: 24
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: buttonSettings.bottom
+			anchors.topMargin: 6
 
 			onClicked: {
-				pageMainWindow.refreshListing()
+				humbleUser.updateOrders()
 			}
 		}
 
 		IconButton {
 			id: buttonDownloads
-			text: FontAwesome.icon.DownloadAlt
-			x: 5
-			y: -7
-			anchors.verticalCenterOffset: 0
-			anchors.leftMargin: 6
-			anchors.left: buttonRefresh.right
-			anchors.verticalCenter: parent.verticalCenter
+			text: '📥'
+			title: 'Downloads'
+			anchors.horizontalCenterOffset: 0
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: buttonRefresh.bottom
+			anchors.topMargin: 6
+			width: 24
+			height: 24
+			onClicked: {
+				Code.qmlComponent("dialog/DownloadsDialog.qml", pageMainWindow, {})
+			}
+
 		}
 		IconButton {
 			id: buttonUpdatesAvailable
-			text: FontAwesome.icon.CircleArrowUp
-			x: 5
-			y: -7
-			anchors.verticalCenterOffset: 0
-			anchors.leftMargin: 6
-			anchors.left: buttonDownloads.right
-			anchors.verticalCenter: parent.verticalCenter
+			text: '📬'
+			title: 'Updates'
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: buttonDownloads.bottom
+			anchors.topMargin: 6
+			width: 24
+			height: 24
+
 		}
 		IconButton {
 			id: buttonLoginUser
-			text: FontAwesome.icon.User
-			x: 5
-			y: -7
-			anchors.verticalCenterOffset: 0
-			anchors.leftMargin: 6
-			anchors.left: buttonUpdatesAvailable.right
-			anchors.verticalCenter: parent.verticalCenter
+			text: '❌'
+			title: 'Log out'
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: buttonUpdatesAvailable.bottom
+			anchors.topMargin: 6
+			width: 24
+			height: 24
+
 			onClicked: {
-				pageMainWindow.loginUser()
+				pageMainWindow.logout()
+			}
+		}
+
+		IconButton {
+			id: buttonSettings
+			text: '*'
+			title: 'Setting'
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: parent.top
+			anchors.topMargin: 6
+			width: 24
+			height: 24
+
+			onClicked: {
+				Code.qmlComponent("dialog/SettingDialog.qml", pageMainWindow, {})
 			}
 		}
 	}
 
-	/* Functions */
+	/* */
+	DatabaseListModel {
+		id: audioDatabaseList
+	}
+	DatabaseListModel {
+		id: asmjsDatabaseList
+	}
+	DatabaseListModel {
+		id: gameDatabaseList
+	}
+	DatabaseListModel {
+		id: ebookDatabaseList
+	}
+	DatabaseListModel {
+		id: troveDatabaseList
+	}
+	WorkerScript {
+		id: listWorker
+		source: "../scripts/ProductsWorker.js"
+	}
 
-	function setActiveList(page)
-	{
-
-		if (page === 'audio') {
-			boxGame.visible = false;
-			boxAudio.visible = true;
-			boxAsmjs.visible = false;
-			boxEbook.visible = false;
-		} else if (page === 'asmjs') {
-			boxGame.visible = false;
-			boxAudio.visible = false;
-			boxAsmjs.visible = true;
-			boxEbook.visible = false;
-		} else if (page === 'games') {
-			boxGame.visible = true;
-			boxAudio.visible = false;
-			boxAsmjs.visible = false;
-			boxEbook.visible = false;
-		} else if (page === 'ebook') {
-			boxGame.visible = false;
-			boxAudio.visible = false;
-			boxAsmjs.visible = false;
-			boxEbook.visible = true;
+	/* signal */
+	signal showList;
+	onShowList: {
+		var activeList = pageMainDialog.currentModel()
+		if ( activeList )
+		{
+			var data = pageMainWindow.databaseGetListing( page === 'games' ? humbleSystem.platform : page, humbleSystem.bits );
+			//listWorker.sendMessage( {'action': 'updateList', 'model': activeList, 'data': data } )
 		}
-		pageMainWindow.page = page
-		pageMainWindow.showListing()
+
+	}
+
+	Component.onCompleted: {
+		setActiveList(page)
+	}
+
+	/* Functions */
+	property var listings: {
+		"games": { 'menu': categoryGames, 'list': boxGame},
+		"audio": { 'menu': categoryAudio, 'list': boxAudio},
+		"ebook": { 'menu': categoryEbook, 'list': boxEbook},
+		"asmjs": { 'menu': categoryASMJS, 'list': boxAsmjs},
+		"trove": { 'menu': categoryTrove, 'list': boxTrove}
+	}
+
+	function markList(activeList) {
+
+		for( var w in listings ) {
+			listings[w].menu.active = listings[w].list.visible = ( w === activeList )
+		}
+		page = activeList
+	}
+
+	function setActiveList(activeList)
+	{
+		markList(activeList)
+		showList()
+	}
+
+	function currentModel() {
+		if ( listings[page] ) {
+			return listings[page].list.model;
+		}
+		return;
 	}
 
 }

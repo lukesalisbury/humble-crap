@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -106,7 +106,7 @@ Item {
 			}
 		},
 		State {
-	  name: "State2"
-  }
+            name: "State2"
+        }
 	]
 }

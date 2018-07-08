@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2018 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -23,16 +23,21 @@
 
 #define SET_IF_NOT(s,k,v) if ( !s.contains(k) ) { s.setValue(k,v); }
 
+/*
+ * Data Paths-
+ * Window: C:\Users\[user]\AppData\Local\humble-crap
+ *
+ */
 
 /**
  * @brief HumbleCrap::HumbleCrap
  * @param parent
  */
-HumbleCrap::HumbleCrap(QObject *parent) :	QObject(parent), settings("HumbleCrap", "HumbleCrap"), settingPrefix("user.")
+HumbleCrap::HumbleCrap(QObject *parent) :	QObject(parent), settings(QSettings::IniFormat, QSettings::UserScope, "HumbleCrap", "HumbleCrap"), settingPrefix("user.")
 {
-    this->loginSuccess = false;
 	this->crapHeader = "CrapIdent";
 
+	/* Write Default parh if settings aren't found */
 	SET_IF_NOT( settings, settingPrefix + "path.temp", QStandardPaths::writableLocation(QStandardPaths::TempLocation) )
 	SET_IF_NOT( settings, settingPrefix + "path.cache", QStandardPaths::writableLocation(QStandardPaths::CacheLocation) )
 	SET_IF_NOT( settings, settingPrefix + "path.content", getDefaultDataPath() )
@@ -49,18 +54,20 @@ QString HumbleCrap::makeUrlLocal(QUrl url)
 	return url.toLocalFile();
 }
 
-/**
 
-   @return
+/**
+ * @brief Allow QML scripts to read the data path
+ * @return
  */
 QString HumbleCrap::getDefaultDataPath()
 {
 	return QDir::cleanPath(QStandardPaths::writableLocation( QStandardPaths::DataLocation ) + QDir::separator() + "data");
 }
 
+/* Settings */
 /**
  * @brief HumbleCrap::getUsername
- * @return
+ * @return last active username
  */
 QString HumbleCrap::getUsername()
 {
@@ -68,25 +75,25 @@ QString HumbleCrap::getUsername()
 }
 
 /**
- * @brief HumbleDownload::setUsername
+ * @brief Set the active username
  * @param email
  */
 void HumbleCrap::setUsername( QString email )
 {
 	if ( email.length() < 4 )
 	{
+		// Email should be atleast a@a.a
 		this->errorMessage = "Please enter correct email";
 		emit appError( this->errorMessage );
 	}
 
-	/* Log User and Password */
 	settings.setValue("username", email);
 }
 
 /**
-
-   @param key
-   @param value
+ * @brief Update setting, adding the default prefix to key
+ * @param key
+ * @param value
  */
 void HumbleCrap::setValue(QString key, QString value)
 {
@@ -94,9 +101,9 @@ void HumbleCrap::setValue(QString key, QString value)
 }
 
 /**
-
-   @param key
-   @return
+ * @brief Retrieves setting, adding the default prefix to key
+ * @param key
+ * @return value of key
  */
 QVariant HumbleCrap::getValue(QString key)
 {
@@ -109,88 +116,85 @@ QVariant HumbleCrap::getValue(QString key)
  * @param file
  * @return
  */
-QByteArray HumbleCrap::fileRead( QString file )
+QByteArray HumbleCrap::readFile( QString file )
 {
 	QByteArray data;
 	QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
 
 	QFile f(path + "/" + file);
-	f.open( QIODevice::ReadOnly );
-	data = f.readAll();
+	if ( f.open( QIODevice::ReadOnly ) ) {
+		data = f.readAll();
+	}
 	f.close();
-
 	return data;
 }
 
 /**
- * @brief HumbleDownload::saveFile
+ * @brief HumbleCrap::writeFile
  * @param content
  * @param as
  */
-void HumbleCrap::fileWrite(QByteArray content, QString as)
+bool HumbleCrap::writeFile(QByteArray content, QString as)
 {
 	QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
 
 	QFile f(path + "/" + as);
-	f.open( QIODevice::WriteOnly|QIODevice::Truncate );
-	f.write( content );
-	f.close();
+	if ( f.open( QIODevice::WriteOnly|QIODevice::Truncate ) ) {
+		f.write( content );
+		f.close();
+		return true; // TODO check
+	}
+	return false;
 }
 
 /**
- * @brief HumbleDownload::saveFile
+ * @brief HumbleCrap::writeFile
  * @param content
  * @param as
  */
-void HumbleCrap::fileWrite(QString content, QString as)
+bool HumbleCrap::writeFile(QString content, QString as)
 {
 	QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
 
 	QFile f(path + "/" + as);
-	f.open( QIODevice::WriteOnly|QIODevice::Truncate );
-	f.write( content.toUtf8() );
-	f.close();
+	if ( f.open( QIODevice::WriteOnly|QIODevice::Truncate ) ) {
+		f.write( content.toUtf8() );
+		f.close();
+		return true; // TODO check
+	}
+	return false;
 }
 
 /**
- * @brief HumbleDownload::downloadFile
- * @param id
- * @param url
- */
-void HumbleCrap::downloadFile(QString id, QString url )
-{
-
-}
-
-/**
- * @brief HumbleDownload::openFile
+ * @brief HumbleCrap::executeFile
  * @param file
  */
-void HumbleCrap::fileExecute( QUrl command, QUrl location )
+bool HumbleCrap::executeFile( QUrl command, QUrl location )
 {
 	if ( command.isLocalFile() )
 	{
-		QProcess::startDetached( command.toLocalFile(), QStringList(), location.toLocalFile() );
+		return QProcess::startDetached( command.toLocalFile(), QStringList(), location.toLocalFile() );
 	}
+	return false;
 }
 
 /**
- * @brief HumbleDownload::openFile
+ * @brief HumbleCrap::openFile
  * @param file
  */
-void HumbleCrap::openFile( QString file )
+bool HumbleCrap::openFile( QString file )
 {
 	QString path = QStandardPaths::writableLocation( QStandardPaths::DataLocation );
 	QUrl file_path = QUrl(path + "/" + file );
-	QDesktopServices::openUrl(file_path);
+	return QDesktopServices::openUrl(file_path);
 }
 
 /**
- * @brief HumbleDownload::openFile
- * @param file
+ * @brief HumbleCrap::openUrl
+ * @param url
  */
-void HumbleCrap::openUrl( QString url )
+bool HumbleCrap::openUrl( QString url )
 {
-	QDesktopServices::openUrl( QUrl(url) );
+	return QDesktopServices::openUrl( QUrl(url) );
 }
 

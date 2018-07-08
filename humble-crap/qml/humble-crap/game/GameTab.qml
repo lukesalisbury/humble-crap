@@ -3,26 +3,25 @@ import QtQuick 2.0
 import "../widget"
 
 ListView {
-
-	anchors.top: parent.top
-	anchors.left: parent.left
-	anchors.right: parent.right
-	anchors.bottom: parent.bottom
 	snapMode: ListView.SnapToItem
 	visible: true
 	boundsBehavior: Flickable.StopAtBounds
+	height: parent.height
+	width: parent.width
 
 	delegate: GameListItem {
 		dbProduct: product
 		dbAuthor: author
-		dbIdent: ident
-		dbIcon: icon ? icon : "humble-crap64.png"
+		dbIdent: product_id
+		//dbIcon: icon ? icon : "../images/humble-crap64.png"
 		dbFormat: 'format'
 		dbLocation: location ? location : ''
 		dbExecutable: executable ? executable : ''
 		dbInstalledDate: installed
 		dbReleaseDate: '0'
+		dbOrder: orderkey
 		anchors.left: parent.left
 		anchors.right: parent.right
 	}
 }
+

@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -22,7 +22,8 @@ import Crap.Humble.Package 1.0
 
 import "../widget"
 import "../dialog"
-import "../scripts/GameDatabase.js" as GameDatabase
+
+import "../scripts/CrapCode.js" as Code
 
 Item {
 	height: 62
@@ -31,105 +32,118 @@ Item {
 
 	signal updateStatus
 
-	property int dbStatus: 0
-	property string dbIdent: ""
 	property alias dbProduct: textTitle.text
 	property alias dbAuthor: textSubtitle.text
 	property alias dbIcon: imageIcon.source
+	property alias buttonBackground: buttonAction.background
+	property alias buttonText: buttonAction.text
+
+	property int dbStatus: 0
+	property string dbIdent: ""
 	property string dbFormat: "x"
 	property string dbReleaseDate: "0"
 	property string dbInstalledDate: "0"
 	property string dbLocation: ""
 	property string dbExecutable: ""
-
-	property alias buttonBackground: buttonAction.background
-	property alias buttonColor: buttonAction.text
+	property string dbOrder: ""
 
 	property date releaseDate: new Date()
 	property date installedDate: new Date()
 	property variant database_info
 	property bool hasUpdate: false
 	property bool canPlay: false
+	property int currentStatus: Code.DEFINES.productSetup
+
+	property var buttonValues: [
+		{ 'text': "Setup", 'colour': "#00acc1"},
+		{ 'text': "Play", 'colour': "#11DD11"},
+		{ 'text': "Update", 'colour': "#DD1111"},
+		{ 'text': "Download", 'colour': "#DD1111"},
+		{ 'text': "Update", 'colour': "#DD1111"},
 
 
-
-
+	]
 
 	MouseArea {
 		property string ident: parent.dbIdent
 		property string format: parent.dbFormat
+
 		id: mouseArea
 		anchors.fill: parent
 
 		Image {
 			id: imageIcon
-			x: 16
-			y: 16
-			width: 32
+			width: 46
 			anchors.left: parent.left
-			anchors.leftMargin: 16
+			anchors.leftMargin: 8
 			anchors.bottom: parent.bottom
-			anchors.bottomMargin: 16
+			anchors.bottomMargin: 8
 			anchors.top: parent.top
-			anchors.topMargin: 16
-			sourceSize.height: 32
-			sourceSize.width: 32
+			anchors.topMargin: 8
+
+			sourceSize.height: 64
+			sourceSize.width: 64
 			fillMode: Image.PreserveAspectFit
-			source: "humble-crap64.png"
+			source: "../images/humble-crap64.png"
 		}
 
 		Text {
 			id: textTitle
-			x: 58
-			y: 11
-			font.bold: true
+
 			anchors.left: imageIcon.right
 			anchors.leftMargin: 10
+			anchors.top: parent.top
+			anchors.topMargin: 8
+
 			font.pixelSize: 15
+			font.bold: true
+
 			color: "#de000000"
+			text: "Game Title"
+
 		}
 
 		Text {
 			id: textSubtitle
-			x: 58
-			y: 37
+
+			anchors.top: textTitle.bottom
+			anchors.topMargin: 8
 			anchors.left: imageIcon.right
 			anchors.leftMargin: 10
+
 			font.pixelSize: 10
+			text: "Author"
 		}
 
 		Text {
 			id: textInformation
-			x: 324
-			y: 37
-			visible: true
 
-			horizontalAlignment: Text.AlignRight
 			anchors.right: buttonAction.left
 			anchors.rightMargin: 8
-			font.pixelSize: 10
-			text: ""
+			anchors.bottom: parent.bottom
+			anchors.bottomMargin: 8
 
+			font.pixelSize: 10
+			text: "INFO"
 		}
 
 		ActionButton {
 			id: buttonAction
-			x: 332
-			y: 8
 			z: 2
+
 			anchors.top: parent.top
 			anchors.topMargin: 8
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: 8
 			anchors.right: parent.right
-			anchors.rightMargin: 4
+			anchors.rightMargin: 8
+
 			text: "Info"
 			onClicked: {
-				database_info = getInfo()
-				if ( canPlay ) {
-					humbleCrap.executeFile(database_info['executable'], database_info['location'])
-				} else {
-					openDialog()
+				switch(currentStatus) {
+					case Code.DEFINES.productDownload:
+
+						break;
 				}
 			}
 		}
@@ -140,39 +154,32 @@ Item {
 
 	/* Signal */
 	onUpdateStatus: {
-		/*
-		database_info = getInfo()
 
-		dbInstalledDate = database_info['installed'] ? database_info['installed'] : ''
-		dbExecutable = database_info['executable'] ? database_info['executable'] : ''
-		dbLocation = database_info['location'] ? database_info['location'] : ''
-
-		checkStatus();
-		*/
+	}
+	onCurrentStatusChanged: {
+		buttonBackground = buttonValues[currentStatus-Code.DEFINES.productSetup].colour
+		buttonText = buttonValues[currentStatus-Code.DEFINES.productSetup].text
 	}
 
-
+	/* On QML Load */
 	Component.onCompleted: {
 		checkStatus()
+
 	}
 
 	/* Function */
-	function getInfo()
-	{
-		return GameDatabase.getInfo(dbIdent)
-	}
-
 	function openDialog()
 	{
-		database_info = getInfo()
-
-		console.log()
-		Qt.createComponent("GameDialog.qml").createObject( pageMainWindow, { productIdent: dbIdent })
+		Code.qmlComponent("game/GameDialog.qml", pageMainWindow, {
+							  'productIdent': dbIdent,
+							  'productIcon': dbIcon,
+							  'productTitle': dbProduct,
+							  'productOrder': dbOrder
+						  })
 	}
 
-
 	function checkStatus() {
-		/*
+
 		releaseDate = new Date(parseInt(dbReleaseDate) * 1000)
 		installedDate = new Date(parseInt(dbInstalledDate) * 1000)
 
@@ -180,27 +187,15 @@ Item {
 		hasUpdate = ( releaseDate > installedDate )
 
 		if ( hasUpdate ) {
-			setButtonToUpdate()
+			currentStatus =  Code.DEFINES.productUpdate
 		} else if ( canPlay ) {
-			setButtonToPlay()
+			currentStatus =  Code.DEFINES.productPlay
 		} else {
-			setButtonToSetup()
+			currentStatus =  Code.DEFINES.productDownload
 		}
-		*/
+
+
 	}
 
-	function setButtonToUpdate() {
-		buttonBackground = "#DD1111"
-		buttonColor = "Update"
-	}
 
-	function setButtonToSetup() {
-		buttonBackground = "#00acc1"
-		buttonColor = "Setup"
-	}
-
-	function setButtonToPlay() {
-		buttonBackground = "#11DD11"
-		buttonColor = "Play"
-	}
 }

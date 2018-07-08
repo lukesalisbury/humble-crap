@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.1
 
-import "../scripts/GameDatabase.js" as GameDatabase
+import "../scripts/CrapDatabase.js" as CrapDatabase
 
 Rectangle {
 	property variant info

@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -20,7 +20,7 @@
 import QtQuick 2.0
 
 import "../widget"
-import "../scripts/GameDatabase.js" as GameDatabase
+import "../scripts/CrapDatabase.js" as CrapDatabase
 
 Rectangle {
 	property int counter: 0
@@ -31,17 +31,16 @@ Rectangle {
 	signal updateList
 	signal cancel
 
-
 	Timer {
 		id: workerTimer
-		interval: 10
+        interval: 4
 		running: false
 		repeat: true
 		onTriggered: {
-			var queryObject = GameDatabase.queuePop()
+			var queryObject = CrapDatabase.queuePop()
 			if (queryObject) {
 				notification.count = ++counter
-				GameDatabase.runQuery(queryObject.action, queryObject.query, queryObject.data)
+				CrapDatabase.runQuery(queryObject.action, queryObject.query, queryObject.data)
 			} else {
 				running = false
 				pageMainWindow.showListing()
@@ -56,18 +55,15 @@ Rectangle {
 		onMessage: {
 			if (messageObject.type === 1) {
 				counter = 0
-				total = GameDatabase.queueSize()
+				total = CrapDatabase.queueSize()
 
-				//  addNotication(widget, attributes, success )
-				notification = notifications.addNotication( "ParseNotication.qml", { title: "Updating Orders", count: 0, total: total } )
+                notification = notifications.addNotication( "ParseNotication.qml", { title: "Updating Orders", count: 0, total: total } )
 
 				workerTimer.running = true
 			} else {
 
 				if (messageObject.queries) {
-					for (var i = 0; i < messageObject.queries.length; i++) {
-						GameDatabase.queueAdd( messageObject.queries[i] )
-					}
+                    CrapDatabase.queueAddMultiple(messageObject)
 				}
 			}
 		}
@@ -79,10 +75,10 @@ Rectangle {
 
 		if ( !workerTimer.running )
 		{
-			var data = GameDatabase.getOrders()
+			var data = CrapDatabase.getOrders()
 			total = data.length;
-
-			if (total) {
+            console.log('Order Size', total)
+            if (total) {
 				workerParse.sendMessage({ data: data })
 			}
 		}

@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -18,24 +18,21 @@
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
 
+//Item Tab page
 WorkerScript.onMessage = function(msg) {
 	if ( msg.action === 'updateList' ) {
 		/* Display */
-		//msg.model.clear();
-		msg.model.sync();
+		msg.model.clear();
 		for ( var i = 0; i < msg.data.length; i++ ) {
 			if ( msg.data[i].release > msg.data[i].installed )
 			{
 				WorkerScript.sendMessage({ 'action': 'update', 'id': msg.data[i].ident } )
 			}
-			//console.log(msg.data[i].product );
 			msg.model.append( msg.data[i] );
 			if ( (i%10) == 0 )
 				msg.model.sync();
 		}
-
 	}
-
 	msg.model.sync();
 }
 

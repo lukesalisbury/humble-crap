@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2018 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -21,63 +21,73 @@
 #include "humble-crap.hpp"
 #include "package-handling.hpp"
 #include "humble-user.hpp"
-#include "humble-download.hpp"
 #include "humble-system.hpp"
+#include "prosaic-download-queue.hpp"
 
 #include <QtGui/QGuiApplication>
 #include <QtQml/QQmlContext>
-#include <QtQml/QQmlEngine>
+#include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlComponent>
 #include <QtQuick/QQuickWindow>
-
 
 // Humble Bundle Content Retrieving APplication
 QNetworkAccessManager webManager;
 HumbleCrap * humble_core;
 HumbleUser * humble_user;
 HumbleSystem * humble_system;
+ProsaicDownloadQueue * humble_download;
+
 
 QNetworkAccessManager * getNetworkManager()
 {
 	return &webManager;
 }
 
+QString getPathFromSettings(QString type)
+{
+	QString path = humble_core->getValue("path."+ type).toString();
+	QDir dir;
+	if ( dir.mkpath(path) )
+		return path;
+	return ""; // Return Empty String if path can not be created
+}
+
+
 int main(int argc, char *argv[])
 {
-	qmlRegisterType<PackageHandling>( "Crap.Humble.Package", 1, 0, "HumblePackage");
-	qmlRegisterType<HumbleDownload>( "Crap.Humble.Download", 1, 0, "HumbleDownload");
-	qmlRegisterType<HumbleSystem>( "Crap.Humble.System", 1, 0, "HumbleSystem");
+	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-
-	QQuickWindow * window;
 	QGuiApplication app(argc, argv);
-	QQmlEngine engine;
-	QQmlComponent component(&engine, QUrl("../humble-crap/qml/humble-crap/dialog/MainWindow.qml") );
-	QObject * object;
+
+	QQmlApplicationEngine engine;
+
+	qmlRegisterType<PackageHandling>( "Crap.Humble.Package", 1, 0, "HumblePackage");
+	//qmlRegisterType<HumbleSystem>( "Crap.Humble.System", 1, 0, "HumbleSystem");
 
 	humble_core = new HumbleCrap();
 	humble_user = new HumbleUser();
 	humble_system = new HumbleSystem();
-
-	app.connect( &engine, SIGNAL(quit()), SLOT(quit()) );
+	humble_download = new ProsaicDownloadQueue();
 
 	engine.rootContext()->setContextProperty("humbleCrap", humble_core);
 	engine.rootContext()->setContextProperty("humbleUser", humble_user);
 	engine.rootContext()->setContextProperty("humbleSystem", humble_system);
+	engine.rootContext()->setContextProperty("humbleDownloadQueue", humble_download);
 
-    humble_user->setUser(humble_core->getUsername());
+	engine.load("../humble-crap/qml/humble-crap/InitWindow.qml");
 
-	if (!component.isReady())
-	{
-		qWarning("%s", qPrintable(component.errorString()));
+	if ( engine.rootObjects().isEmpty()) {
 		return -1;
 	}
 
-	object = component.create();
-	window = qobject_cast<QQuickWindow*>( object );
-	window->show();
+	int retval = app.exec();
 
-	return app.exec();
+	delete humble_download;
+	delete humble_system;
+	delete humble_user;
+	delete humble_core;
+
+	return retval;
 
 }
 

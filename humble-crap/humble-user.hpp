@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -22,66 +22,85 @@
 #define HUMBLEUSER_HPP
 
 #include <QObject>
+#include <QQmlEngine>
 #include "humble-network.hpp"
 #include "local-cookie-jar.hpp"
+
+
 class HumbleUser: public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit HumbleUser(QObject *parent = 0);
+	explicit HumbleUser(QObject *parent= 0);
 
 	Q_INVOKABLE QString getErrorMessage();
 
+	Q_INVOKABLE void gatherLoginToken();
 	Q_INVOKABLE void login(QString email, QString password, QString pin);
 
-	Q_INVOKABLE void updateOrders( );
+	Q_INVOKABLE void updateOrders();
 	Q_INVOKABLE QString getOrders();
 
 	Q_INVOKABLE QString getUser();
+	Q_INVOKABLE QString getCaptcha();
 
 	Q_INVOKABLE void setUser(QString email);
-    Q_INVOKABLE void setCaptcha(QString challenge, QString response);
+	Q_INVOKABLE void setCaptcha(QString challenge, QString response);
+	Q_INVOKABLE void setHumbleGuard(QString pin);
 
-    Q_INVOKABLE void setHumbleGuard(QString pin);
+	Q_INVOKABLE	void clearUserCookies();
+
+	Q_INVOKABLE	int retrieveSignedDownloadURL(QString ident, QString machine_name, QString filename);
+
+	private:
+	QString getCsrfValue();
+	void clearRequestSignals();
+
 
 
 signals:
-	void appError();
-	void appSuccess();
+	void signedDownloadError(QString ident, QString error);
+	void signedDownloadSuccess(QString ident, QString url);
+
+	void loginError();
+	void loginSuccess();
 
 	void orderError();
 	void orderSuccess();
 
 	void loginRequired();
-    void captchaRequired();
-    void guardRequired();
+	void captchaRequired();
+	void guardRequired();
+	void sslMissing();
+
 
 public slots:
+	void signedDownloadReturned( QByteArray content );
+	void signedDownloadRejected( QString errorMessage, QByteArray content, qint16 httpCode);
 
 	void loginReturned( QByteArray content );
-	void loginError( QString errorMessage );
+	void loginRejected( QString errorMessage, QByteArray content, qint16 httpCode);
 
 	void ordersReturned( QByteArray content );
-	void ordersError( QString errorMessage );
-	void ordersRejected(QString errorMessage);
+	void ordersRejected( QString errorMessage, QByteArray content, qint16 httpCode);
 
 
 protected:
 	LocalCookieJar * cookies;
 	HumbleNetworkRequest request;
-	QString currentPassword;
-	QString currentUser;
-    QString currentCaptcha;
-	QByteArray pageContent;
+	QString currentPassword = "";
+	QString currentUser = "";
+	QString currentCaptcha = "";
+	QByteArray orderContent;
+	QString currentSkipCaptcha = "";
 
-
-	private:
-	bool loginSuccess = 0;
+private:
+	bool loginSuccessful = 0;
 	bool testMode = 0;
+	bool signedDownloadRequesting = 0;
+	QString signedDownloadIdent = "";
 	QString errorMessage;
-
-	QString getCsrfValue();
 
 };
 

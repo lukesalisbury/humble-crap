@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -17,14 +17,10 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
-import QtQuick 2.0
-import QtQuick.Dialogs 1.0
 
+#include <QtCore>
 
-
-Rectangle {
-	width: 400
-	height: 300
-
-
+bool doesFileExists(QString path) {
+	QFileInfo check_file(path);
+	return (check_file.exists() && check_file.isFile());
 }

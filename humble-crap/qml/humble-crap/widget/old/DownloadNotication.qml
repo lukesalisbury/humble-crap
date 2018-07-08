@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -17,7 +17,9 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
+
 import QtQuick 2.0
+import Crap.Humble.Download 1.0
 
 Rectangle {
 	id: download_rectangle
@@ -26,21 +28,22 @@ Rectangle {
 	color: "#333333"
 	radius: 1
 	border.width: 0
-	property string title: "Text"
-	property int total: 0
-	property int count: 0
+	opacity: 1
+	property alias url: downloader.url
+	property alias progress: downloader.progress
+	property bool textMode: true
+	property url cacheFile: ""
 
 	signal successful( string content )
 	signal error( string message )
 
-
 	Text {
-		id: text
+        id: textMessage
 		color: "#ffffff"
-		text: qsTr("")
+		text: qsTr("Text")
 		verticalAlignment: Text.AlignVCenter
-		anchors.right: parent.right
-		anchors.rightMargin: 24
+		anchors.right: status.left
+		anchors.rightMargin: 0
 		wrapMode: Text.WrapAnywhere
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 18
@@ -51,21 +54,31 @@ Rectangle {
 		font.pointSize: 8
 	}
 
-	onTotalChanged:
-	{
-		text.text = title + " " +  count + "/" + total;
-		if ( count === total )
-			successful("completed")
-	}
 
-	onCountChanged:
-	{
-		if ( count % 4 == 0 )
-			text.text = title + " " +  count + "/" + total;
-		if ( count === total )
-		{
-			successful("completed")
-			state = "Removing"
+	HumbleDownload {
+		id: downloader
+		onUrlChanged: {
+            textMessage.text = "Downloading " + getUrlFile()
+			makeRequest()
+		}
+		onAppError: {
+			download_rectangle.error( getError() );
+			download_rectangle.state = "Removing"
+		}
+		onAppSuccess: {
+			if ( textMode ) {
+				download_rectangle.successful( getContent() );
+			} else {
+				download_rectangle.successful( url.toString() );
+				writeContent(cacheFile)
+			}
+			download_rectangle.state = "Removing"
+		}
+		onDownloadStarted: {
+
+		}
+        onRequestProgress: {
+			meter.width = (status.width - 4) * progress
 		}
 	}
 
@@ -75,6 +88,7 @@ Rectangle {
 			PropertyChanges {
 				target: download_rectangle
 				opacity: 0
+				height: 0
 			}
 		}
 	]
@@ -84,10 +98,9 @@ Rectangle {
 			from: "*"; to: "Removing"
 			NumberAnimation { properties: "opacity"; easing.type: Easing.OutCurve; duration: 1000; onRunningChanged: {
 					if (!running) {
-
+						console.log("Destroying...")
 					}
 				} }
 		}
 	]
-
 }

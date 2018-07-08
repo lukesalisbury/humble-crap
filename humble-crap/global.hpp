@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -21,11 +21,15 @@
 #ifndef GLOBAL_HPP
 #define GLOBAL_HPP
 
-#define HUMBLEURL_PROCESSLOGIN "https://www.humblebundle.com/processlogin?ajax=true"
-#define HUMBLEURL_LIBRARY "https://www.humblebundle.com/home/library?ajax=true"
+#define HUMBLEURL_PROCESSLOGIN "https://www.humblebundle.com/processlogin"
+#define HUMBLEURL_LIBRARY "https://www.humblebundle.com/api/v1/user/order"
 #define HUMBLEURL_COOKIE "https://www.humblebundle.com/"
 #define HUMBLEURL_CAPTCHA "https://www.humblebundle.com/user/captcha"
 #define HUMBLEURL_LOGIN "https://www.humblebundle.com/login?ajax=true"
+#define HUMBLEURL_ORDER "https://www.humblebundle.com/api/v1/user/order/"
+
+#define HUMBLEURL_TROVE "https://www.humblebundle.com/monthy/trove"
+#define HUMBLEURL_TROVEDOWNLOAD "https://dl.humble.com/" //{filename}?key={key}&ttl={ttl}&t={token}"
+#define HUMBLEURL_DOWNLOADSIGN "https://www.humblebundle.com/api/v1/user/download/sign"
 
 #endif // GLOBAL_HPP
-

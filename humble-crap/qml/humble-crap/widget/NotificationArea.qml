@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -20,39 +20,42 @@
 import QtQuick 2.0
 
 Item {
-	id: item1
-	width: 100
-	height: 65
+	id: itemNotificaction
 	z: 10
 
-	property int xaxis: 0
 
-	function addNotication(widget, attributes, success ) {
-		var note;
+	property int noticationCount: 0
+
+	function addNotication(widget, attributes, success) {
+		var note
 
 		var component = Qt.createComponent(widget)
-		if (component.status == Component.Ready) {
+		if (component.status === Component.Ready) {
 			attributes.anchors = {
 				centerIn: parent
 			}
 			note = component.createObject(column1, attributes)
-			if ( success )
-				note.successful.connect(success);
+			if (success)
+				note.successful.connect(success)
 		}
 
-		return note;
+		return note
 	}
-
-
 	Column {
-		id: column1
-		anchors.bottom: parent.bottom
-		anchors.bottomMargin: 0
+		id: columnNotificaction
 		anchors.right: parent.right
-		anchors.rightMargin: 0
-		transformOrigin: Item.BottomRight
-		anchors.horizontalCenter: parent.horizontalCenter
-		spacing: 4
+		anchors.bottom: parent.bottom
+		anchors.left: parent.left
 
+		spacing: 4
+		populate: Transition {
+			NumberAnimation { properties: "x,y"; from: 200; duration: 100; easing.type: Easing.OutBounce }
+		}
+		add: Transition {
+			NumberAnimation { properties: "x,y"; from: 200; duration: 100; easing.type: Easing.OutBounce }
+		}
+		move: Transition {
+			NumberAnimation { properties: "x,y"; from: 200; duration: 100; easing.type: Easing.OutBounce }
+		}
 	}
 }

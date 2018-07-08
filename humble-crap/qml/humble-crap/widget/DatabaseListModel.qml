@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -19,31 +19,21 @@
 ****************************************************************************/
 import QtQuick 2.0
 
-import "../scripts/GameDatabase.js" as GameDatabase
-
 
 ListModel {
 	property int updateCount: 0
-	property ParseNotication note: null
 
 	signal updateList
 	signal display( string page, int bits )
 	signal cancel
 
-
-
 	/* Signal */
 	onUpdateList: {
-		//workerTimer.running = true
-		note = notifications.addNotication(
-					"ParseNotication.qml",
-					{ title: "Updating Database", count: 0, total: GameDatabase.queueSize() },
-					function (content) { pageMainWindow.display() }
-				)
+
 	}
 
 	onUpdateCountChanged: {
-		//updateNotice.text = "Updates: " + updateCount
+
 	}
 
 	onCancel: {
@@ -52,7 +42,7 @@ ListModel {
 
 
 	onDisplay: {
-		updateCount = 0;
+
 	}
 
 

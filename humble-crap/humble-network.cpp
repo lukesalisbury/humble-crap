@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -39,7 +39,7 @@ QByteArray gUncompress(const QByteArray &data)
 	static const int CHUNK_SIZE = 1024;
 	char out[CHUNK_SIZE];
 
-	/* allocate inflate state */
+	// allocate inflate state
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
 	strm.opaque = Z_NULL;
@@ -49,6 +49,7 @@ QByteArray gUncompress(const QByteArray &data)
 	ret = inflateInit2(&strm, 15 + 32); // gzip decoding
 	if (ret != Z_OK)
 		return QByteArray();
+
 
 	// run inflate()
 	do {
@@ -77,27 +78,21 @@ QByteArray gUncompress(const QByteArray &data)
 
 /**
  * @brief HumbleNetworkRequest::HumbleNetworkRequest
- * @param url
- * @param parent
  */
-void HumbleNetworkRequest::getToken()
-{
-	connect( this, SIGNAL(requestSuccessful(QByteArray)), this, SLOT(finishRequestCookies(QByteArray)));
-    this->makeRequest( QUrl(HUMBLEURL_LOGIN) );
-}
-
-HumbleNetworkRequest::HumbleNetworkRequest() : cookiesRetrieved(0)
+HumbleNetworkRequest::HumbleNetworkRequest(): sslMissing(0)
 {
 	/* Setup webManager */
-    this->webManager = getNetworkManager();
+	this->webManager = getNetworkManager();
 
 	connect( this->webManager, SIGNAL( sslErrors(QNetworkReply*, const QList<QSslError>) ), SLOT( sslError(QNetworkReply*, const QList<QSslError> )));
+	connect( this->webManager, SIGNAL( finished(QNetworkReply*) ), this, SLOT( finishRequest(QNetworkReply*)) );
 
 	if ( !QSslSocket::supportsSsl() )
 	{
 		qDebug() << "OpenSSL not installed";
 		this->errorMessage = "OpenSSL not installed";
-		emit requestError( this->errorMessage );
+		this->sslMissing = true;
+		emit requestError( this->errorMessage, NULL, 0 );
 	}
 
 }
@@ -117,6 +112,7 @@ void HumbleNetworkRequest::appendPost(QString key, QString value)
 	this->postData.append(key);
 	this->postData.append("=");
 	this->postData.append(value);
+
 }
 
 /**
@@ -151,30 +147,34 @@ bool HumbleNetworkRequest::writeContent(QString outputFile)
  * @brief HumbleNetworkRequest::makeRequest
  * @return
  */
-bool HumbleNetworkRequest::makeRequest( QUrl url )
+bool HumbleNetworkRequest::makeRequest(QUrl url, QString requester)
 {
 	if ( QSslSocket::supportsSsl() )
 	{
-
 		QNetworkRequest request;
 
+		//request.setRawHeader("User-Agent", "Humble-bundle Content Retrieving APplication - http://github.org/lukesalisbury/humble-crap");
+		request.setRawHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+		request.setRawHeader("Accept-Encoding", "gzip,deflate" );
+		request.setRawHeader("Accept-Language", "en-US,en;q=0.5" );
+		//request.setRawHeader("Connection", "keep-alive" );
+		request.setRawHeader("Accept", "application/json, text/javascript, */*; q=0.01" );
+		request.setRawHeader("DNT", "1" );
+		if ( !requester.isEmpty() )
+			request.setRawHeader("X-Requested-By", requester.toUtf8() );
 
+		request.setRawHeader("origin", HUMBLEURL_COOKIE);
+		request.setRawHeader("referer", HUMBLEURL_COOKIE);
 
-    //	request.setRawHeader("User-Agent", "Humble-bundle Content Retrieving APplication");
-		request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
-		request.setRawHeader("Accept-Encoding", "gzip,deflate,qcompress" );
-        request.setRawHeader("Accept", "application/json" );
-        request.setRawHeader("X-Requested-By", "hb_android_app" );
-        //request.setRawHeader("Referer", "http://github.org/lukesalisbury/humble-crap" );
-        request.setRawHeader("origin", HUMBLEURL_COOKIE);
-
+		if ( !this->csrfPreventionToken.isEmpty() ) {
+			request.setRawHeader("CSRF-Prevention-Token", this->csrfPreventionToken.toUtf8() );
+			this->csrfPreventionToken = ""; // Unset token, incase we reuse this object
+		}
 
 		request.setUrl( url );
 
+		//qDebug() << "Url" << url << " - " << this->postData.toPercentEncoding("=&");
 
-
-
-		connect( this->webManager, SIGNAL( finished(QNetworkReply*) ), this, SLOT( finishRequest(QNetworkReply*)) );
 
 		if ( this->postData.length() > 0 )
 		{
@@ -186,8 +186,10 @@ bool HumbleNetworkRequest::makeRequest( QUrl url )
 			this->reply = this->webManager->get( request );
 		}
 
-        connect( this->reply, SIGNAL( downloadProgress( qint64, qint64 )), this, SLOT(downloadProgress( qint64, qint64 )) );
+		connect( this->reply, SIGNAL( downloadProgress( qint64, qint64 )), this, SLOT(downloadProgress( qint64, qint64 )) );
 		return true;
+	} else {
+
 	}
 	return false;
 }
@@ -204,17 +206,18 @@ bool HumbleNetworkRequest::setCookies(QNetworkCookieJar * cookies_jar)
 }
 
 /**
- * @brief HumbleNetworkRequest::finishRequestCookies
+ * @brief HumbleNetworkRequest::printCookies
  * @param content
  */
-void HumbleNetworkRequest::finishRequestCookies(QByteArray content)
+void HumbleNetworkRequest::printCookies()
 {
 	QNetworkCookieJar * cookies = this->webManager->cookieJar();
 	QList<QNetworkCookie> list = cookies->cookiesForUrl( QUrl(HUMBLEURL_COOKIE) );
+	for (int i = 0; i < list.size(); ++i)
+	{
+		qDebug() << list.at(i).name() << "-" << list.at(i).value();
+	}
 
-	cookiesRetrieved = true;
-
-	disconnect( this, SIGNAL(requestSuccessful(QByteArray)), NULL, NULL );
 }
 
 /**
@@ -225,7 +228,11 @@ void HumbleNetworkRequest::finishRequestCookies(QByteArray content)
 void HumbleNetworkRequest::sslError(QNetworkReply* pReply, const QList<QSslError> & errors )
 {
 	this->errorMessage = "SSL Error";
-	emit requestError( this->errorMessage );
+	qDebug() << "Network Error:" << pReply->errorString();
+	for (int i = 0; i < errors.size(); ++i) {
+		qDebug() << "SSL Error:" << errors.at(i).errorString();
+	}
+	emit requestError( this->errorMessage, NULL, 0 );
 }
 
 /**
@@ -238,71 +245,55 @@ void HumbleNetworkRequest::downloadProgress(qint64 bytesReceived, qint64 bytesTo
 	emit requestProgress(bytesReceived, bytesTotal);
 }
 
-
-
 /**
  * @brief HumbleNetworkRequest::finishRequest
  * @param pReply
  */
 void HumbleNetworkRequest::finishRequest( QNetworkReply* pReply )
 {
-    QVariant variantCookies = reply->header(QNetworkRequest::SetCookieHeader);
-           QList<QNetworkCookie> cookies = qvariant_cast<QList<QNetworkCookie> >(variantCookies);
-           qDebug() << pReply->url().toString() << "Cookies reply: " << cookies;
-
-	if ( pReply == reply )
+	//QVariant variantCookies = this->reply->header(QNetworkRequest::SetCookieHeader);
+	if ( pReply == this->reply )
 	{
 		QVariant redirectionTarget = pReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
 		QUrl url = redirectionTarget.toUrl();
+		qint16 code = pReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
+		QByteArray data = pReply->readAll();
+		if ( pReply->rawHeader("Content-Encoding") == "gzip") {
+			this->downloadData = gUncompress(data);
+		} else {
+			this->downloadData = data;
+		}
 		pReply->deleteLater();
-
-		disconnect(this->webManager, SIGNAL(finished(QNetworkReply*)), this, 0);
 
 		if ( pReply->error() )
 		{
-            qDebug() << tr("Download failed: %1. %2").arg(pReply->errorString(), pReply->url().toString());
+			//qDebug() << tr("Download failed: %1. %2").arg(pReply->errorString(), pReply->url().toString());
+			//QList<QByteArray> headerList = pReply->rawHeaderList();
+			//foreach(QByteArray head, headerList) {
+			//	qDebug() << head << ":" << pReply->rawHeader(head);
+			//}
 			this->errorMessage = pReply->errorString();
-			emit requestError( this->errorMessage );
-
-			//disconnect(this, 0, 0, 0);
+			emit requestError( this->errorMessage, this->downloadData, code );
 		}
-        else if ( url.path() == "/user/humbleguard" )
+		else if ( url.path() == "/login")
 		{
-			qDebug() << tr("Login failed") << url.query();
+			//qDebug() << tr("Login failed") << url.query();
 			this->errorMessage = "Login failed";
-			emit requestError( this->errorMessage );
-
-			//disconnect(this, 0, 0, 0);
+			emit requestError( this->errorMessage, this->downloadData, code );
 		}
-        else if ( url.path() == "/login" )
-        {
-            qDebug() << tr("Login failed") << url.query();
-            this->errorMessage = "Login failed";
-            emit requestError( this->errorMessage );
-
-            //disconnect(this, 0, 0, 0);
-        }
 		else if ( url.isEmpty() )
 		{
-			this->downloadData = pReply->readAll();
-			qDebug() << tr("Download Successful: %1").arg(pReply->url().toString() );
-
-			if ( pReply->rawHeader("Content-Encoding") == "gzip")
-			{
-				QByteArray data = gUncompress(this->downloadData);
-				emit requestSuccessful( data );
-			}
-			else
-			{
-				emit requestSuccessful( this->downloadData );
-			}
-
-			//disconnect(this, 0, 0, 0);
+			qDebug() << tr("Download Successful: %1").arg(pReply->url().toString());
+			//QList<QByteArray> headerList = pReply->rawHeaderList();
+			//foreach(QByteArray head, headerList) {
+			//    qDebug() << head << ":" << pReply->rawHeader(head);
+			//}
+			emit requestSuccessful( this->downloadData );
 		}
 		else
 		{
-            qDebug() << tr("New URL") << pReply->url().toString();
+			qDebug() << tr("New URL requested") << pReply->url().toString();
 			this->makeRequest( url );
 		}
 

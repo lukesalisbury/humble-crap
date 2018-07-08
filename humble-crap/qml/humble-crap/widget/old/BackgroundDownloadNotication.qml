@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -24,11 +24,11 @@ import Crap.Humble.Download 1.0
 Rectangle {
 	id: download_rectangle
 	width: 288
-	height: 48
+	height: 32
 	color: "#333333"
 	radius: 1
 	border.width: 0
-	opacity: 1
+	opacity: 0
 	property alias url: downloader.url
 	property alias progress: downloader.progress
 	property bool textMode: true
@@ -93,7 +93,7 @@ Rectangle {
 			download_rectangle.state = "Removing"
 		}
 		onAppSuccess: {
-			console.log("onAppSuccess")
+			//console.log("onAppSuccess")
 			if ( textMode ) {
 				download_rectangle.successful( getContent() );
 			} else {
@@ -105,7 +105,7 @@ Rectangle {
 		onDownloadStarted: {
 			//console.log("onDownloadStarted")
 		}
-		onrequestProgress: {
+		onRequestProgress: {
 			meter.width = (status.width - 4) * progress
 		}
 	}
@@ -116,19 +116,15 @@ Rectangle {
 			PropertyChanges {
 				target: download_rectangle
 				opacity: 0
-				height: 0
+			}
+		},
+		State {
+			name: "Error"
+			PropertyChanges {
+				target: download_rectangle
+				opacity: 1
 			}
 		}
 	]
 
-	transitions: [
-		Transition {
-			from: "*"; to: "Removing"
-			NumberAnimation { properties: "opacity"; easing.type: Easing.OutCurve; duration: 1000; onRunningChanged: {
-					if (!running) {
-						console.log("Destroying...")
-					}
-				} }
-		}
-	]
 }

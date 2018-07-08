@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -20,16 +20,18 @@
 import QtQuick 2.0
 
 import "../widget"
-import "../scripts/GameDatabase.js" as GameDatabase
+import "../scripts/CrapDatabase.js" as CrapDatabase
 
 Rectangle {
 	property variant productInfo
 	property variant parentWidget
+
 	id: dialogItem
 	color: "#60000000"
 	opacity: 1
 	z: 200
 	anchors.fill: parent
+
 	MouseArea {
 		id: modalArea
 		hoverEnabled: true
@@ -39,12 +41,13 @@ Rectangle {
 			id: dialogPage
 			x: 0
 			y: 0
+			z: 300
 			width: 392
 			height: 410
 			color: "#ffffff"
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.horizontalCenter: parent.horizontalCenter
-			z: 211
+
 			Rectangle {
 				id: rectangleTitle
 				width: 0
@@ -85,27 +88,14 @@ Rectangle {
 					fillMode: Image.PreserveAspectFit
 					sourceSize.height: 32
 					sourceSize.width: 32
-					source: "images/humble-crap64.png"
+					source: "../images/humble-crap64.png"
 				}
 
-				ActionButton {
-					id: buttonClose
-					x: 374
-					y: 36
-					text: "Close"
-					anchors.verticalCenter: parent.verticalCenter
-					anchors.right: parent.right
-					anchors.rightMargin: 24
-					onClicked: {
-						pageItem.destroy()
-					}
-				}
+
 			}
 
 			Rectangle {
 				id: rectangleDownloads
-				x: 0
-				y: 267
 				width: 392
 				height: 90
 				color: "#000000"
@@ -127,10 +117,9 @@ Rectangle {
 
 				Text {
 					id: textDownload
-					x: 65
-					y: 0
 					color: "#ffffff"
 					text: qsTr("Downloads")
+					font.bold: true
 					anchors.horizontalCenter: parent.horizontalCenter
 					horizontalAlignment: Text.AlignHCenter
 					font.pixelSize: 12
@@ -139,8 +128,6 @@ Rectangle {
 
 			Rectangle {
 				id: rectangleFooter
-				x: 46
-				y: 262
 				height: 43
 				color: "#ffffff"
 				anchors.right: parent.right
@@ -152,7 +139,6 @@ Rectangle {
 
 				Rectangle {
 					id: rectangleFooterBorder
-					x: 300
 					height: 1
 					color: "#1e000000"
 					anchors.top: parent.top
@@ -165,12 +151,11 @@ Rectangle {
 
 				DialogButton {
 					id: buttonSecondaryAction
-					x: 319
 					width: 80
 					height: 20
 					text: "Play"
 					anchors.top: parent.top
-					anchors.topMargin: 6
+					anchors.topMargin: 8
 					anchors.left: parent.left
 					anchors.leftMargin: 24
 					z: 1
@@ -192,6 +177,22 @@ Rectangle {
 						//}
 					}
 				}
+				DialogButton {
+					id: buttonCloseAction
+					width: 80
+					height: 20
+					text: "Close"
+					anchors.right: parent.right
+					anchors.rightMargin: 24
+					anchors.top: parent.top
+					anchors.topMargin: 8
+					z: 1
+					opacity: 1
+					onClicked: {
+						dialogItem.destroy()
+					}
+				}
+
 			}
 		}
 	}

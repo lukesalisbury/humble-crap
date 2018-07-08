@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -17,37 +17,45 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
-import QtQuick 2.0
 
-Rectangle {
+// Updates existing items, add new, removed one, for list that contains all items
+WorkerScript.onMessage = function(msg) {
 
-	color: "#104b9e"
-    ActionButton {
-        id: buttonRefresh
-		width: 91
-        text: qsTr("Refresh")
-		anchors.bottom: parent.bottom
-		anchors.bottomMargin: 10
-		anchors.top: parent.top
-		anchors.topMargin: 10
-		anchors.left: parent.left
-		anchors.leftMargin: 10
-		onClicked: {
-            pageMainWindow.refresh()
+	var h
+	var items = {}
+
+	//Existing Items
+	if ( msg.model.count )
+	{
+		for( var g = 0; g < msg.model.count; g++ )
+		{
+			h = msg.model.get(g)
+			items[h.id] = g
 		}
 	}
 
-    ActionButton {
-		id: buttonQuit
-		x: 300
-		onClicked: Qt.quit()
-		text: qsTr("Quit")
-		anchors.top: parent.top
-		anchors.topMargin: 10
-		anchors.bottom: parent.bottom
-		anchors.bottomMargin: 10
-		anchors.right: parent.right
-		anchors.rightMargin: 10
-
+	//Active Items
+	if ( msg.items.length )
+	{
+		for( var i in msg.items )
+		{
+			h = msg.items[i];
+			if ( typeof items[h.id] === 'number' ) {
+				msg.model.set(items[h.id], h, items[h.id])
+				delete items[h.id]
+			} else {
+				msg.model.append( h )
+			}
+		}
+		var o = 0
+		for( var u in items )
+		{
+			msg.model.remove(items[u] + o)
+			o++
+		}
+	} else {
+		msg.model.clear()
 	}
+	msg.model.sync()
 }
+

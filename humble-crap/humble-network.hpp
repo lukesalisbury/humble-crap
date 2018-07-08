@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -27,8 +27,8 @@
 #include <QtCore>
 #include <QNetworkCookieJar>
 #include <QNetworkCookie>
-#include "local-cookie-jar.hpp"
 
+#include "local-cookie-jar.hpp"
 
 class HumbleNetworkRequest : public QObject
 {
@@ -40,20 +40,18 @@ class HumbleNetworkRequest : public QObject
 		bool writeContent( QString outputFile );
 
 		void appendPost( QString key, QString value );
-		bool makeRequest( QUrl url );
+		bool makeRequest(QUrl url, QString requester = "XMLHttpRequest");
 
 		QNetworkCookieJar * getCookies();
 		bool setCookies(QNetworkCookieJar * cookies_jar);
-		bool cookiesRetrieved;
+		void printCookies();
 
-		void getToken();
 	signals:
-		void requestError( QString errorMessage );
+		void requestError( QString errorMessage,  QByteArray content, qint16 httpCode );
 		void requestSuccessful( QByteArray content );
 		void requestProgress( qint64 bytesReceived, qint64 bytesTotal );
 
 	public slots:
-		void finishRequestCookies( QByteArray content );
 		void finishRequest( QNetworkReply* pReply );
 		void sslError( QNetworkReply* pReply, const QList<QSslError> & errors );
 		void downloadProgress ( qint64 bytesReceived, qint64 bytesTotal );
@@ -63,6 +61,9 @@ class HumbleNetworkRequest : public QObject
 		QByteArray downloadData;
 		QString errorMessage;
 		QByteArray postData;
+	public:
+		bool sslMissing;
+		QString csrfPreventionToken = "";
 };
 
 #endif // HUMBLENETWORK_HPP

@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2015 Luke Salisbury
+* Copyright © 2015 Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -21,7 +21,7 @@ import QtQuick 2.0
 import Crap.Humble.Package 1.0
 
 import "../widget"
-import "../scripts/GameDatabase.js" as GameDatabase
+import "../scripts/CrapDatabase.js" as CrapDatabase
 
 Item {
 	height: 62
@@ -69,7 +69,7 @@ Item {
 	}
 
 	onUpdateStatus: {
-		database_info = GameDatabase.getInfo(dbIdent, dbFormat,pageMainWindow.page)
+		database_info = CrapDatabase.getInfo(dbIdent, dbFormat,pageMainWindow.page)
 
 		dbInstalledDate = database_info['installed'] ? database_info['installed'] : ''
 		dbExecutable = database_info['executable'] ? database_info['executable'] : ''
@@ -163,7 +163,7 @@ Item {
 			anchors.rightMargin: 4
 			text: "Info"
 			onClicked: {
-				database_info = GameDatabase.getInfo(parent.ident, parent.format, pageMainWindow.page)
+				database_info = CrapDatabase.getInfo(parent.ident, parent.format, pageMainWindow.page)
 				if ( canPlay ) {
 					humbleCrap.executeFile(database_info['executable'], database_info['location'])
 				} else {
@@ -172,7 +172,7 @@ Item {
 			}
 		}
 		onClicked: {
-			database_info = GameDatabase.getInfo(ident, format, pageMainWindow.page)
+			database_info = CrapDatabase.getInfo(ident, format, pageMainWindow.page)
 			Qt.createComponent("ItemDialog.qml").createObject( pageMainWindow, { info: database_info, item: parent })
 		}
 	}
