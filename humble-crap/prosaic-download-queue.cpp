@@ -25,12 +25,10 @@
 #include "prosaic-download-queue.hpp"
 #include "shared-functions.hpp"
 
-enum { DIS_INACTIVE, DIS_ACTIVE, DIS_COMPLETED};
-
 QDataStream & operator>>(QDataStream & in, DownloadItem *&a) {
 
 	a = new DownloadItem();
-	in >> a->owner >> a->address >> a->filename >> a->userKey >> a->state >> a->downloadSize;
+	in >> a->owner >> a->address >> a->filename >> a->userKey >> a->userCategory >> a->state >> a->downloadSize;
 
 	a->setup();
 
@@ -38,7 +36,7 @@ QDataStream & operator>>(QDataStream & in, DownloadItem *&a) {
 }
 QDataStream & operator<<(QDataStream & out, DownloadItem * a)
 {
-	out << a->owner << a->address << a->filename << a->userKey << a->state << a->downloadSize;
+	out << a->owner << a->address << a->filename << a->userKey << a->userCategory << a->state << a->downloadSize;
 	return out;
 }
 
@@ -47,17 +45,23 @@ QDataStream & operator<<(QDataStream & out, DownloadItem * a)
 DownloadItem::DownloadItem(QString owner, QUrl address, QString outputFilename)
 {
 	this->owner = owner;
+	this->overwriting = owner == "cache";
 	this->address = address;
 	this->filename = outputFilename;
 	this->setup();
 }
 void DownloadItem::setup() {
 
-	this->id = (int)qHash(this->owner + this->address.path());
+	this->id = static_cast<int>(qHash(this->owner + this->address.path()));
 
-	this->temporaryFilename = this->filename + ".downloading";
+	if ( this->overwriting ) {
+		this->file = new QFile(this->filename);
+		this->file->resize(0);
+	} else {
+		this->temporaryFilename = this->filename + ".downloading";
+		this->file = new QFile(this->temporaryFilename);
+	}
 
-	this->file = new QFile(this->temporaryFilename);
 }
 
 /* Events */
@@ -70,21 +74,24 @@ void DownloadItem::requestWrite()
 void DownloadItem::requestCompleted()
 {
 	// Remove the read event
-	QObject::disconnect(this->networkReply, &QNetworkReply::readyRead, NULL,NULL);
+	QObject::disconnect(this->networkReply, &QNetworkReply::readyRead, nullptr,nullptr);
 
 	//Close Temporary File, rename file to original filename
 	this->file->close();
-	this->file->rename(this->filename);
+	if ( !this->overwriting ) {
+		this->file->rename(this->filename);
+	}
 
 	this->pause(); //
 
 	this->state = DIS_COMPLETED; // Completed
-	if ( this->parentQueue ) {
-		emit this->parentQueue->completed(this->id); // Alert Download Queue
-	} else {
-		qDebug() << "Download Item Complete but is missing parent queue" << this->filename;
+	if ( this->networkReply->error() == QNetworkReply::NoError) {
+		if ( this->parentQueue ) {
+			emit this->parentQueue->completed(this->id); // Alert Download Queue
+		} else {
+			qDebug() << "Download Item Complete but is missing parent queue" << this->filename;
+		}
 	}
-
 }
 
 void DownloadItem::requestProgress(qint64 bytesReceived, qint64 bytesTotal)
@@ -121,6 +128,10 @@ QVariantMap DownloadItem::getItemDetail()
 	q["downloaded"] = this->downloadSize;
 	q["total"] = this->fileSize;
 	q["owner"] = this->owner;
+	q["userKey"] = this->userKey;
+	q["userCategory"] = this->userCategory;
+
+
 
 	return q;
 }
@@ -128,7 +139,7 @@ QVariantMap DownloadItem::getItemDetail()
 QVariantMap DownloadItem::getFullDetail()
 {
 	QVariantMap q = this->getItemDetail();
-	q["userKey"] = this->userKey;
+
 	if ( this->returnContent )
 	{
 		q["file"] = this->address.fileName();
@@ -172,16 +183,16 @@ void DownloadItem::pause()
 {
 	if ( this->networkReply ) {
 		if ( this->eventsSet ) {
-			disconnect(this->networkReply, SIGNAL(downloadProgress(qint64,qint64)), NULL,NULL );
-			disconnect(this->networkReply, SIGNAL(error(QNetworkReply::NetworkError)), NULL,NULL );
-			disconnect(this->networkReply, SIGNAL(finished()), NULL,NULL);
-			disconnect(this->networkReply, &QNetworkReply::readyRead, NULL,NULL);
+			disconnect(this->networkReply, SIGNAL(downloadProgress(qint64,qint64)), nullptr,nullptr );
+			disconnect(this->networkReply, SIGNAL(error(QNetworkReply::NetworkError)), nullptr,nullptr );
+			disconnect(this->networkReply, SIGNAL(finished()), nullptr,nullptr);
+			disconnect(this->networkReply, &QNetworkReply::readyRead, nullptr,nullptr);
 			this->eventsSet = false;
 			this->state = DIS_INACTIVE;
 		}
 		this->networkReply->abort();
-		this->networkReply->deleteLater();
-		this->networkReply = nullptr;
+		//this->networkReply->deleteLater();
+		//this->networkReply = nullptr;
 	}
 	if ( this->file ) {
 		this->file->close();
@@ -264,34 +275,37 @@ ProsaicDownloadQueue::~ProsaicDownloadQueue()
    @param url
    @param as User to download as
  */
-int ProsaicDownloadQueue::append(QString url, QString as, QString userKey, bool returnData)
+int ProsaicDownloadQueue::append(QString url, QString as, QString userKey, QString userCategory, bool returnData,  qint8 state)
 {
 	QUrl address = QUrl(url);
 	QString directory = getPathFromSettings("cache");
 
-	if ( directory.isEmpty() )
-	{
+	if ( directory.isEmpty() ) {
 		qWarning() << __func__ << "Directory is missing";
-	}
-	else
-	{
+	} else {
 		QString filename = address.fileName();
 		if ( !filename.length() ) {
 			filename = "default";
 		}
 		QString downloadpath = directory + "/" + filename;
-		quint32 counter = 0;
-		while ( doesFileExists(downloadpath) ) {
-			downloadpath = directory + "/" + QString::number(++counter) + "-" + filename;
-			if ( counter > 0xFFFF )
-				break;
+		if (as != "cache" ) {
+			quint32 counter = 0;
+			while ( doesFileExists(downloadpath) ) {
+				downloadpath = directory + "/" + QString::number(++counter) + "-" + filename;
+				if ( counter > 0xFFFF )
+					break;
+			}
 		}
-		DownloadItem * q =new DownloadItem( as, address, downloadpath );
+		DownloadItem * q = new DownloadItem( as, address, downloadpath );
 		q->returnContent = returnData;
 		q->userKey = userKey;
+		q->userCategory = userCategory;
 		this->queue.append(q);
 
 		emit updated();
+		if (state == DIS_ACTIVE ) {
+			this->startDownloadItem(q);
+		}
 		return q->id;
 	}
 	return 0;
@@ -317,11 +331,13 @@ void ProsaicDownloadQueue::openDirectory(int32_t id)
 QVariantList ProsaicDownloadQueue::getItemList()
 {
 	QVariantList list;
+
 	QListIterator<DownloadItem*> i(this->queue);
 	while (i.hasNext()) {
 		DownloadItem* d = i.next();
 		list.append(d->getItemDetail());
 	}
+
 	return list;
 }
 
@@ -331,7 +347,6 @@ QVariantList ProsaicDownloadQueue::getItemList()
  */
 QVariantMap ProsaicDownloadQueue::getItemDetail(int id)
 {
-
 	QVariantMap q;
 	foreach (DownloadItem * d, this->queue) {
 		if ( d->id == id) {
@@ -394,7 +409,7 @@ void ProsaicDownloadQueue::startDownloadItem(DownloadItem * item) {
 			}
 			);
 		} else {
-			qDebug() << "Network Reply is not null";
+			qDebug() << "Network Reply is not nullptr";
 		}
 	}
 }

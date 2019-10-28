@@ -24,20 +24,6 @@ Qt.include("CrapCode.js")
 var runningOrderUpdate = false // Stop it running multiple times
 
 /*
-  getItemDetail
-	{
-id
-filename
-url
-downloadstate
-downloaded
-total
-}
-*/
-
-
-
-/*
 function parseDownload(id, downloads) {
 	var db = getDatabase()
 	var types = "|"
@@ -81,6 +67,7 @@ function updateOrders(worker, gameKeys) {
 		if (total) {
 			for (var value in gameKeys) {
 				var key = gameKeys[value].gamekey
+
 				items.push(key)
 			}
 		}
@@ -91,6 +78,7 @@ function updateOrders(worker, gameKeys) {
 
 function parseOrdersPage(worker, jsonString) {
 	var gameOrders = JSON.parse(jsonString)
+
 	if (gameOrders !== null) {
 		return updateOrders(worker, gameOrders)
 	}

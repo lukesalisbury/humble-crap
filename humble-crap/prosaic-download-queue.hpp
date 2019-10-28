@@ -30,11 +30,11 @@
 
 
 #if defined(WIN32)
-	#define BREAKPOINT() *((int *) NULL) = 0; exit(3);
+	#define BREAKPOINT() *((int *) nullptr) = 0; exit(3);
 #else
 	#define BREAKPOINT() raise(SIGABRT);
 #endif
-
+enum { DIS_INACTIVE, DIS_ACTIVE, DIS_COMPLETED};
 
 class ProsaicDownloadQueue;
 
@@ -60,6 +60,7 @@ class DownloadItem: public QObject
 		QString temporaryFilename = "";
 		QString owner = "";
 		QString userKey = "";
+		QString userCategory = "";
 		QUrl address = QUrl("");
 		quint8 state = 0; // { Pause, Running, completed }
 
@@ -68,7 +69,7 @@ class DownloadItem: public QObject
 		bool cache = false;
 		bool resumable = false;
 		bool returnContent = false;
-
+		bool overwriting = false;
 		qint64 fileSize = 0;
 		qint64 existSize = 0;
 		qint64 downloadSize = 0;
@@ -113,7 +114,7 @@ class ProsaicDownloadQueue: public QObject
 
 		Q_INVOKABLE bool changeDownloadItemState(int id, qint8 state);
 		Q_INVOKABLE void ableUserDownloadItem( QString user, qint8 state);
-		Q_INVOKABLE int append(QString url, QString as, QString userKey, bool returnData = false);
+		Q_INVOKABLE int append(QString url, QString as, QString userKey, QString userCategory, bool returnData = false, qint8 state = DIS_INACTIVE);
 
 		Q_INVOKABLE void openDirectory(int id);
 

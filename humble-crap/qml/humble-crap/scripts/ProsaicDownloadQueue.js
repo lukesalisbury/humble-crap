@@ -19,37 +19,33 @@
 ****************************************************************************/
 
 // Updates existing items, add new, removed one, for list that contains all items
-WorkerScript.onMessage = function(msg) {
-
+WorkerScript.onMessage = function (msg) {
 	var h
-	var items = {}
+	var items = {
 
-	//Existing Items
-	if ( msg.model.count )
-	{
-		for( var g = 0; g < msg.model.count; g++ )
-		{
+	}
+
+	// Existing Items
+	if (msg.model.count) {
+		for (var g = 0; g < msg.model.count; g++) {
 			h = msg.model.get(g)
 			items[h.id] = g
 		}
 	}
 
-	//Active Items
-	if ( msg.items.length )
-	{
-		for( var i in msg.items )
-		{
-			h = msg.items[i];
-			if ( typeof items[h.id] === 'number' ) {
+	// Active Items
+	if (msg.items.length) {
+		for (var i in msg.items) {
+			h = msg.items[i]
+			if (typeof items[h.id] === 'number') {
 				msg.model.set(items[h.id], h, items[h.id])
 				delete items[h.id]
 			} else {
-				msg.model.append( h )
+				msg.model.append(h)
 			}
 		}
 		var o = 0
-		for( var u in items )
-		{
+		for (var u in items) {
 			msg.model.remove(items[u] + o)
 			o++
 		}
@@ -58,4 +54,3 @@ WorkerScript.onMessage = function(msg) {
 	}
 	msg.model.sync()
 }
-

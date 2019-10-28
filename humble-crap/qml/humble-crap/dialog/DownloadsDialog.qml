@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.11
 import "../widget"
 
 Rectangle {
@@ -18,6 +18,7 @@ Rectangle {
 		id: refreshListTimer
 		triggeredOnStart: true
 		repeat: true
+		interval: 2000
 		onTriggered: {
 			llll = humbleDownloadQueue.items
 			pageDownloads.update()
@@ -107,7 +108,7 @@ Rectangle {
 	}
 
 	function updatelist(msg) {
-
+		console.log('updatelist')
 		var h
 		var items = {}
 

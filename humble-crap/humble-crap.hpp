@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages

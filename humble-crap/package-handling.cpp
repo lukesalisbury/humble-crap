@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2018 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -19,41 +19,62 @@
 ****************************************************************************/
 
 #include "package-handling.hpp"
-
+#include "shared-functions.hpp"
+#include <QtConcurrent/QtConcurrent>
+#include <QMimeDatabase>
 
 PackageHandling::PackageHandling(QObject *parent) :
 	QObject(parent)
 {
 }
 
+void PackageHandling::install(QString filename, QString ident, QString category) {
 
-void PackageHandling::setFile(const QString &a)
-{
+	QtConcurrent::run([=]() {
+		QMimeDatabase db;
 
-	if (a != filename) {
-		filename = a;
-		selectSource();
-		emit fileChanged();
-	}
+		QString contentPath = getPathFromSettings("content");
+
+		QFile file(filename);
+		if ( !file.exists() ) {
+			emit this->failed( ident, "File does not exist");
+		}
+
+		QFileInfo info(file);
+
+		QMimeType type = db.mimeTypeForFile(filename);
+		qDebug() << "Mime type:" << type.name();
+
+		// Ebooks
+		if ( category == "ebook" || this->ebookTypes.contains(type.name(), Qt::CaseInsensitive) ) {
+			contentPath.append("ebook");
+			contentPath.append(QDir::separator());
+			QDir dir(contentPath);
+			dir.mkdir(contentPath);
+			if ( this->compressedTypes.contains(type.name(), Qt::CaseInsensitive) ) {
+				emit this->failed( ident, "Compressed Ebooks not supported yet.");
+			} else {
+				QString path = QString("%1%2%3")
+						.arg(contentPath).arg(QDir::separator()).arg(info.fileName());
+				qDebug() << path;
+				if ( file.rename( path ) ) {
+					info.setFile(path);
+					emit this->completed(ident, path, info.absolutePath());
+				} else {
+					emit this->failed( ident, "File could not be moved to new location.");
+				}
+			}
+
+		} else if ( category == "audio") {
+			contentPath.append("audio");
+			contentPath.append(QDir::separator());
+			emit this->failed( ident, "Audio not supported yet.");
+		} else {
+			contentPath.append("games");
+			contentPath.append(QDir::separator());
+			emit this->failed( ident, "Not supported yet.");
+		}
+	});
+
 }
 
-
-QString PackageHandling::file() const
-{
-	return filename;
-}
-
-bool PackageHandling::selectSource()
-{
-
-//	QString fileName = QFileDialog::getOpenFileName(NULL, tr("Open Downloaded Package"), QStandardPaths::writableLocation( QStandardPaths::DownloadLocation ), tr("Package Files (*.zip *.tar.gz *.tar.bz2)"));
-//	qDebug() << fileName;
-
-	return true;
-}
-
-bool PackageHandling::selectDestination()
-{
-
-return true;
-}

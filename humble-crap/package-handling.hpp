@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -28,25 +28,33 @@ class PackageHandling : public QObject
 {
 	Q_OBJECT
 	public:
-		explicit PackageHandling(QObject *parent = 0);
+		explicit PackageHandling(QObject *parent = nullptr);
 
-		Q_PROPERTY(QString file READ file WRITE setFile NOTIFY fileChanged)
-
-		void setFile(const QString &a);
-		QString file() const;
+		Q_INVOKABLE void install(QString filename, QString ident, QString category);
 
 	signals:
-		void fileChanged();
+		void completed(QString ident, QString executable, QString path);
+		void failed(QString ident, QString message);
 
-	public slots:
 
+	private:
+		//ebook types
+		QStringList ebookTypes = {
+			"application/x-mobipocket-ebook",
+			"application/pdf",
+			"application/epub+zip"
+		};
+		//Audio types
+		//Compressed types
+		QStringList compressedTypes = {
+			"application/x-zip-compressed",
+			"application/x-bzip2",
+			"application/x-7z-compressed"
+		};
+		//Packages types
+		//Executable types
+		//Special Instructions
 
-private:
-	QString filename;
-
-	bool selectSource();
-
-	bool selectDestination();
 
 
 };

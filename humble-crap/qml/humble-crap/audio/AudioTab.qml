@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.11
 
 ListView {
 	snapMode: ListView.SnapToItem
@@ -9,11 +9,16 @@ ListView {
 	delegate: AudioListItem {
 		dbProduct: product
 		dbAuthor: author
-		dbIdent: ident
-		dbIcon: icon ? icon : "humble-crap64.png"
-		dbFormat: format
-		dbLocation: location ? location : ' '
+		dbIdent: product_id
+		//dbIcon: icon ? icon : "../images/humble-crap64.png"
+		dbFormat: 'format'
+		dbLocation: location ? location : ''
+		dbExecutable: executable ? executable : ''
+		dbInstalledDate: installed
+		dbReleaseDate: '0'
+		dbOrder: orderkey
 		anchors.left: parent.left
 		anchors.right: parent.right
+
 	}
 }

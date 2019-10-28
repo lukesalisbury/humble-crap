@@ -5,7 +5,7 @@ item {
 
 
 /*
-import QtQuick 2.0
+import QtQuick 2.11
 import QtWebEngine 1.3
 import QtQuick.Window 2.3
 import QtQuick.Controls 1.4

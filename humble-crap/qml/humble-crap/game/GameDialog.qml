@@ -18,7 +18,7 @@
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.11
 
 import "../widget"
 
@@ -213,7 +213,7 @@ Rectangle {
 						anchors.rightMargin: 8
 
 						onClicked: {
-							var id = Crap.downloadProduct(url, productIdent, machineName, 0)
+							var id = Crap.downloadProduct(url, "games", productIdent, machineName, 0)
 						}
 					}
 				}
@@ -226,12 +226,12 @@ Rectangle {
 	/* Signals */
 	Component.onCompleted: {
 
-		var database_info = pageMainWindow.databaseGetItem(productIdent)
+		var database_info = humbleUser.getItem(productIdent)
 		if ( database_info.status ) {
 			productVersion = database_info.status ? database_info.installed : 'No Installed'
 		}
 
-		var download_list = pageMainWindow.databaseGetDownloads(productIdent)
+		var download_list = humbleUser.getItemDownloads(productIdent)
 		for ( var q = 0; q <download_list.length; q++ ) {
 			listDownloads.model.append(download_list[q])
 		}

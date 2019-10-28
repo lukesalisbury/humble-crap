@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -17,8 +17,10 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
-import QtQuick 2.0
+import QtQuick 2.11
 import QtGraphicalEffects 1.0
+
+import "../scripts/CrapTheme.js" as Theme
 
 Item {
 	id: container
@@ -39,11 +41,11 @@ Item {
 	Rectangle {
 		id: rectangleBox
 		anchors.fill: parent
-		color: active ? background: Qt.tint(background, 'gray')
+		color: active ? Theme.buttonBackground: Qt.tint(Theme.buttonBackground, 'gray')
 
 		Text {
 			id: text1
-			color: container.colour
+			color: Theme.buttonColor
 			text: container.text
 			anchors.fill: parent
 			verticalAlignment: Text.AlignVCenter
@@ -83,7 +85,7 @@ Item {
 				anchors.bottomMargin: -1
 				anchors.leftMargin: 1
 				anchors.topMargin: 1
-				color: Qt.lighter( active ? background: Qt.tint(background, 'gray'), 1.5)
+				color: active ? Theme.buttonActiveBackground: Qt.tint(Theme.buttonBackground, 'gray')
 			}
 		},
 		State {
@@ -91,7 +93,7 @@ Item {
 
 			PropertyChanges {
 				target: rectangleBox
-				color: Qt.darker(active ? background: Qt.tint(background, 'gray'), 1.5)
+				color: active ? Theme.buttonHoverBackground: Qt.tint(Theme.buttonBackground, 'gray')
 			}
 		}
 	]

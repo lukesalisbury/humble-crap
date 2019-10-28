@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -20,8 +20,10 @@
 #include "global.hpp"
 #include "humble-user.hpp"
 #include "local-cookie-jar.hpp"
+#include "shared-functions.hpp"
 
 #include <QJsonDocument>
+
 /**
  * @brief
  * @return
@@ -29,7 +31,12 @@
 HumbleUser::HumbleUser(QObject *parent): QObject(parent)
 {
 	this->testMode = false;
+}
 
+HumbleUser::~HumbleUser() {
+	if (this->db) {
+		delete this->db;
+	}
 }
 
 /**
@@ -50,6 +57,22 @@ void HumbleUser::gatherLoginToken()
 	this->request.makeRequest( QUrl(HUMBLEURL_LOGIN) );
 }
 
+void HumbleUser::userDatabaseLoaded() {
+	if ( this->testMode ) {
+		this->orderContent = "";
+		this->loginSuccessful = true;
+		// Load Cache page content
+		QString path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+		QString filepath = QDir(path).filePath(this->currentUser + ".orders");
+		QFile file(filepath);
+		if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
+			this->orderContent = file.readAll();
+			file.close();
+		}
+		emit orderSuccess();
+	}
+}
+
 /**
  * @brief Set
  * @param email
@@ -61,11 +84,22 @@ void HumbleUser::setUser(QString email)
 
 	this->request.setCookies(static_cast<QNetworkCookieJar*>(cookies));
 
-	if ( !this->testMode ) {
-		//Check if orders page can be access, if not emit login required
-		this->updateOrders();
+	if (this->db) {
+		delete this->db;
 	}
-
+	this->db = new HumbleUserDatabase(this->currentUser);
+	connect( this->db, &HumbleUserDatabase::databaseLoaded,
+			 [=]() {
+				this->userDatabaseLoaded();
+			}
+	);
+	connect( this->db, &HumbleUserDatabase::databaseFailed,
+			 [=]() {
+				emit orderError();
+			}
+	);
+	//Check if orders page can be access, if not emit login required
+	this->updateOrders();
 }
 
 /**
@@ -171,7 +205,7 @@ void HumbleUser::login( QString email, QString password, QString pin  )
    @param ident product name, often stored as machine_name
    @param filename requested file
  */
-int HumbleUser::retrieveSignedDownloadURL(QString ident, QString machine_name, QString filename)
+int HumbleUser::retrieveSignedDownloadURL(QString ident, QString cat, QString machine_name, QString filename)
 {
 	// Humble download must have a token so we
 	// use https://www.humblebundle.com/api/v1/user/download/sign with
@@ -180,12 +214,13 @@ int HumbleUser::retrieveSignedDownloadURL(QString ident, QString machine_name, Q
 
 	// Limit the request so we can store the ident for the download
 	if ( this->signedDownloadRequesting ) {
-		emit signedDownloadError(this->signedDownloadIdent, "An Signed Download is already in progress");
+		emit signedDownloadError(ident, cat, "An Signed Download is already in progress");
 		return 0;
 	}
 
 	this->signedDownloadRequesting = true;
 	this->signedDownloadIdent = ident;
+	this->signedDownloadCategory = cat;
 
 	/* Make requests */
 	this->clearRequestSignals();
@@ -202,21 +237,20 @@ int HumbleUser::retrieveSignedDownloadURL(QString ident, QString machine_name, Q
 }
 
 
+
 /**
  * @brief HumbleUser::getOrders
  * @return
  */
-QString HumbleUser::getOrders(  )
+QString HumbleUser::getOrders()
 {
 	QString string;
 
-	if ( testMode )
-	{
+	if ( testMode ) {
 		QString path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-		QString filepath = QDir(path).filePath("example-order.json");
+		QString filepath = QDir(path).filePath(this->currentUser + ".orders");
 		QFile file(filepath);
-		if ( file.open(QIODevice::ReadOnly | QIODevice::Text) )
-		{
+		if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
 			string = QString( file.readAll() );
 			file.close();
 		}
@@ -229,6 +263,106 @@ QString HumbleUser::getOrders(  )
 	return string;
 }
 
+QJsonDocument HumbleUser::getOrdersJSON() {
+
+	return QJsonDocument::fromJson(this->getOrders().toUtf8());
+}
+
+
+
+QString HumbleUser::getTrove()
+{
+	QString string;
+	QString path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+
+	QString filepath = QDir(path).filePath("trove.html");
+	QFile file(filepath);
+	if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
+		string = QString( file.readAll() );
+		file.close();
+		qDebug() << string;
+	} else {
+		qDebug() << file.errorString();
+	}
+	return string;
+}
+
+QString HumbleUser::getOrder(QString id, bool useCachedVersion)
+{
+	QString string;
+
+	if ( useCachedVersion || testMode ) {
+		QString path = getPathFromSettings("cache");
+		QString filepath = QDir(path).filePath(id);
+		QFile file(filepath);
+		if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
+			string = QString( file.readAll() );
+			file.close();
+		}
+	}
+	else
+	{
+		string = QString( this->orderContent.data() );
+	}
+
+	return string;
+}
+
+QVariantList HumbleUser::updateOrder(QString key, QString content)
+{
+	QVariantList changes;
+	if (this->db) {
+		changes = this->db->updateOrder(key, QJsonDocument::fromJson(content.toUtf8()));
+	}
+	return changes;
+}
+
+/**
+   @brief HumbleUser::insertOrder
+   @param key
+   @param content
+ */
+void HumbleUser::insertOrder(QString key, QString content)
+{
+	if (this->db) {
+		this->db->insertOrder(key, content);
+	}
+}
+
+void HumbleUser::installProduct(QString ident, QString executable, QString path) {
+	if (this->db) {
+		this->db->installProduct(ident, executable, path);
+	}
+}
+
+QVariantList HumbleUser::getItems(QString page, qint32 bits)
+{
+	QVariantList empty;
+	if (this->db) {
+		return this->db->getItems(page, bits);
+	}
+	return empty;
+}
+
+QVariantMap HumbleUser::getItem(QString ident)
+{
+	if (this->db) {
+		return this->db->getItem(ident);
+	}
+	QVariantMap empty;
+	return empty;
+}
+
+QVariantList HumbleUser::getItemDownloads(QString ident, QString platfrom)
+{
+	if (this->db) {
+		return this->db->getItemDownloads(ident, platfrom);
+	}
+	QVariantList empty;
+	return empty;
+}
+
+
 /**
  * @brief HumbleUser::getUser
  * @return
@@ -238,23 +372,27 @@ QString HumbleUser::getUser()
 	return this->currentUser;
 }
 
+
 /**
  * @brief HumbleUser::updateOrdersPage
  */
 void HumbleUser::updateOrders()
 {
-	if (this->request.sslMissing)
-	{
-		emit sslMissing( );
-		return;
+	if ( !this->testMode ) {
+		if (this->request.sslMissing)
+		{
+			emit sslMissing( );
+			return;
+		}
+		this->request.setCookies(static_cast<QNetworkCookieJar*>(cookies));
+
+		this->clearRequestSignals();
+		connect( &this->request, SIGNAL(requestSuccessful(QByteArray)), this, SLOT(ordersReturned(QByteArray)));
+		connect( &this->request, SIGNAL(requestError(QString, QByteArray, qint16)), this, SLOT(ordersRejected(QString, QByteArray, qint16)) );
+
+		this->request.makeRequest( QUrl(HUMBLEURL_LIBRARY) );
 	}
-	this->request.setCookies(static_cast<QNetworkCookieJar*>(cookies));
 
-	this->clearRequestSignals();
-	connect( &this->request, SIGNAL(requestSuccessful(QByteArray)), this, SLOT(ordersReturned(QByteArray)));
-	connect( &this->request, SIGNAL(requestError(QString, QByteArray, qint16)), this, SLOT(ordersRejected(QString, QByteArray, qint16)) );
-
-	this->request.makeRequest( QUrl(HUMBLEURL_LIBRARY) );
 }
 
 /**
@@ -270,7 +408,7 @@ void HumbleUser::ordersReturned( QByteArray content )
 
 	// Cache page content
 	QString path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-	QString filepath = QDir(path).filePath("orders-" + this->currentUser);
+	QString filepath = QDir(path).filePath(this->currentUser + ".orders");
 	QFile file(filepath);
 	if ( file.open(QIODevice::WriteOnly | QIODevice::Text) ) {
 		file.write(content);
@@ -359,9 +497,9 @@ void HumbleUser::signedDownloadReturned( QByteArray content )
 	QJsonDocument responsed = QJsonDocument::fromJson(content);
 	//"{\n"signed_url":"https://dl.humble.com/necrosoftgames/oh_deer_1.2.1.win.zip?key="... (379)
 	if ( responsed["signed_url"].isString() ) {
-		emit signedDownloadSuccess(this->signedDownloadIdent, responsed["signed_url"].toString());
+		emit signedDownloadSuccess(this->signedDownloadIdent, this->signedDownloadCategory, responsed["signed_url"].toString());
 	} else {
-		emit signedDownloadError(this->signedDownloadIdent, "Signed Download URL wasn't returned");
+		emit signedDownloadError(this->signedDownloadIdent, this->signedDownloadCategory, "Signed Download URL wasn't returned");
 	}
 	this->signedDownloadRequesting = false;
 	this->signedDownloadIdent = "";
@@ -381,7 +519,7 @@ void HumbleUser::signedDownloadRejected(QString errorMessage, QByteArray content
 	}
 	qDebug() << "signedDownloadRejected" << httpCode << errorMessage;
 
-	emit signedDownloadError(this->signedDownloadIdent, errorMessage);
+	emit signedDownloadError(this->signedDownloadIdent,  this->signedDownloadCategory,errorMessage);
 	this->signedDownloadRequesting = false;
 	this->signedDownloadIdent = "";
 }
@@ -419,6 +557,6 @@ void HumbleUser::clearUserCookies() {
  */
 void HumbleUser::clearRequestSignals()
 {
-	disconnect(&this->request, SIGNAL(requestSuccessful(QByteArray)), NULL, NULL);
-	disconnect(&this->request, SIGNAL(requestError(QString, QByteArray, qint16)), NULL, NULL );
+	disconnect(&this->request, SIGNAL(requestSuccessful(QByteArray)), nullptr, nullptr);
+	disconnect(&this->request, SIGNAL(requestError(QString, QByteArray, qint16)), nullptr, nullptr );
 }

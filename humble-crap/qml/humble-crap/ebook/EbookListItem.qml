@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -17,167 +17,134 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
-import QtQuick 2.0
-import Crap.Humble.Package 1.0
+import QtQuick 2.11
+
 
 import "../widget"
-import "../scripts/CrapDatabase.js" as CrapDatabase
+import "../dialog"
 
-Item {
-	height: 62
-	width: 400
-	visible: true
+import "../scripts/CrapCode.js" as Code
 
-	signal updateStatus
-
-	property int dbStatus: 0
-	property string dbIdent: ""
+BaseListItem {
 	property alias dbProduct: textTitle.text
 	property alias dbAuthor: textSubtitle.text
 	property alias dbIcon: imageIcon.source
-	property string dbFormat: "x"
-	property string dbReleaseDate: "0"
-	property string dbInstalledDate: "0"
-	property string dbLocation: ""
-	property string dbExecutable: ""
-
 	property alias buttonBackground: buttonAction.background
-	property alias buttonColor: buttonAction.text
+	property alias buttonText: buttonAction.text
 
-	property date releaseDate: new Date()
-	property date installedDate: new Date()
-	property variant database_info
-	property bool hasUpdate: false
-	property bool canPlay: false
+	/* Widgets */
 
 
-	function checkStatus() {
-		releaseDate = new Date(parseInt(dbReleaseDate) * 1000)
-		installedDate = new Date(parseInt(dbInstalledDate) * 1000)
+	Image {
+		id: imageIcon
+		width: 46
+		anchors.left: parent.left
+		anchors.leftMargin: 8
+		anchors.bottom: parent.bottom
+		anchors.bottomMargin: 8
+		anchors.top: parent.top
+		anchors.topMargin: 8
 
-		canPlay = ( dbExecutable !== null && dbExecutable !== "" )
-		hasUpdate = ( releaseDate > installedDate )
-
-		if ( hasUpdate ) {
-			setButtonToUpdate()
-		} else if ( canPlay ) {
-			setButtonToPlay()
-		} else {
-			setButtonToSetup()
-		}
-
+		sourceSize.height: 64
+		sourceSize.width: 64
+		fillMode: Image.PreserveAspectFit
+		source: "../images/humble-crap64.png"
 	}
 
-	onUpdateStatus: {
-		database_info = CrapDatabase.getInfo(dbIdent, dbFormat,pageMainWindow.page)
+	Text {
+		id: textTitle
 
-		dbInstalledDate = database_info['installed'] ? database_info['installed'] : ''
-		dbExecutable = database_info['executable'] ? database_info['executable'] : ''
-		dbLocation = database_info['location'] ? database_info['location'] : ''
+		anchors.left: imageIcon.right
+		anchors.leftMargin: 10
+		anchors.top: parent.top
+		anchors.topMargin: 8
 
-		checkStatus();
+		font.pixelSize: 15
+		font.bold: true
+
+		color: "#de000000"
+		text: "Game Title"
 	}
 
-	function setButtonToUpdate() {
-		buttonBackground = "#DD1111"
-		buttonColor = "Update"
+	Text {
+		id: textSubtitle
+
+		anchors.top: textTitle.bottom
+		anchors.topMargin: 8
+		anchors.left: imageIcon.right
+		anchors.leftMargin: 10
+
+		font.pixelSize: 10
+		text: "Author"
 	}
 
-	function setButtonToSetup() {
-		buttonBackground = "#00acc1"
-		buttonColor = "Setup"
+	Text {
+		id: textInformation
+
+		anchors.right: buttonAction.left
+		anchors.rightMargin: 8
+		anchors.bottom: parent.bottom
+		anchors.bottomMargin: 8
+
+		font.pixelSize: 10
+		text: "INFO"
 	}
 
-	function setButtonToPlay() {
-		buttonBackground = "#11DD11"
-		buttonColor = "Play"
-	}
+	ActionButton {
+		id: buttonAction
+		z: 2
 
-	MouseArea {
-		property string ident: parent.dbIdent
-		property string format: parent.dbFormat
-		id: mouseArea
-		anchors.fill: parent
+		anchors.top: parent.top
+		anchors.topMargin: 8
+		anchors.bottom: parent.bottom
+		anchors.bottomMargin: 8
+		anchors.right: parent.right
+		anchors.rightMargin: 8
 
-		Image {
-			id: imageIcon
-			x: 16
-			y: 16
-			width: 32
-			anchors.left: parent.left
-			anchors.leftMargin: 16
-			anchors.bottom: parent.bottom
-			anchors.bottomMargin: 16
-			anchors.top: parent.top
-			anchors.topMargin: 16
-			sourceSize.height: 32
-			sourceSize.width: 32
-			fillMode: Image.PreserveAspectFit
-			source: "humble-crap64.png"
-		}
+		text: "Info"
+		onClicked: {
 
-		Text {
-			id: textTitle
-			x: 58
-			y: 11
-			font.bold: true
-			anchors.left: imageIcon.right
-			anchors.leftMargin: 10
-			font.pixelSize: 15
-			color: "#de000000"
-		}
+			switch(currentStatus) {
+				case Code.DEFINES.productDownload:
 
-		Text {
-			id: textSubtitle
-			x: 58
-			y: 37
-			anchors.left: imageIcon.right
-			anchors.leftMargin: 10
-			font.pixelSize: 10
-		}
-
-		Text {
-			id: textInformation
-			x: 324
-			y: 37
-			visible: true
-
-			horizontalAlignment: Text.AlignRight
-			anchors.right: buttonAction.left
-			anchors.rightMargin: 8
-			font.pixelSize: 10
-			text: ""
-
-		}
-
-		ActionButton {
-			id: buttonAction
-			x: 332
-			y: 8
-			z: 2
-			anchors.top: parent.top
-			anchors.topMargin: 8
-			anchors.bottom: parent.bottom
-			anchors.bottomMargin: 8
-			anchors.right: parent.right
-			anchors.rightMargin: 4
-			text: "Info"
-			onClicked: {
-				database_info = CrapDatabase.getInfo(parent.ident, parent.format, pageMainWindow.page)
-				if ( canPlay ) {
-					humbleCrap.executeFile(database_info['executable'], database_info['location'])
-				} else {
-					Qt.createComponent("ItemDialog.qml").createObject( pageMainWindow, { info: database_info, item: parent.parent })
-				}
+					break;
 			}
 		}
-		onClicked: {
-			database_info = CrapDatabase.getInfo(ident, format, pageMainWindow.page)
-			Qt.createComponent("ItemDialog.qml").createObject( pageMainWindow, { info: database_info, item: parent })
+	}
+
+
+	/* Signal */
+	onClicked: {
+		var d = humbleUser.getItemDownloads(dbIdent, "ebook")
+
+		if ( d.length === 1) {
+			//
+			Code.downloadProduct(d[0].url, "ebook", d[0].product_id, d[0].machine_name)
+		} else if ( d.length > 1) {
+			// TODO: Open  chooser
+			console.log('Too many download for ', dbIdent)
+		} else {
+			// TODO: Show Alert
+			console.log('No download for ', dbIdent)
 		}
 	}
 
-	Component.onCompleted: {
-		checkStatus()
+	/* On QML Load */
+
+	/* Function */
+	function openDialog()
+	{
+		/*
+		Code.qmlComponent("game/GameDialog.qml", pageMainWindow, {
+							  'productIdent': dbIdent,
+							  'productIcon': dbIcon,
+							  'productTitle': dbProduct,
+							  'productOrder': dbOrder
+						  })
+						  */
 	}
+
+
+
+
 }

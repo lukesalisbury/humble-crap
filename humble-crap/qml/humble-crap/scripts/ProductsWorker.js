@@ -19,22 +19,21 @@
 ****************************************************************************/
 
 //Item Tab page
-WorkerScript.onMessage = function(msg) {
-	if ( msg.action === 'updateList' ) {
+WorkerScript.onMessage = function (msg) {
+	if (msg.action === 'updateList') {
 		/* Display */
-		msg.model.clear();
-		for ( var i = 0; i < msg.data.length; i++ ) {
-			if ( msg.data[i].release > msg.data[i].installed )
-			{
-				WorkerScript.sendMessage({ 'action': 'update', 'id': msg.data[i].ident } )
+		msg.model.clear()
+		for (var i = 0; i < msg.data.length; i++) {
+			if (msg.data[i].release > msg.data[i].installed) {
+				WorkerScript.sendMessage({
+											 "action": 'update',
+											 "id": msg.data[i].ident
+										 })
 			}
-			msg.model.append( msg.data[i] );
-			if ( (i%10) == 0 )
-				msg.model.sync();
+			msg.model.append(msg.data[i])
+			if ((i % 10) == 0)
+				msg.model.sync()
 		}
 	}
-	msg.model.sync();
+	msg.model.sync()
 }
-
-
-

@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -17,7 +17,7 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
-import QtQuick 2.0
+import QtQuick 2.11
 import QtQuick.XmlListModel 2.0
 import QtQuick.LocalStorage 2.0
 import QtQuick.Window 2.0
@@ -29,9 +29,10 @@ import "../ebook"
 import "../game"
 import "../widget"
 
-import "../scripts/CrapDatabase.js" as CrapDatabase
+
 import "../scripts/CrapOrders.js" as CrapOrders
 import "../scripts/CrapCode.js" as Code
+import "../scripts/CrapTheme.js" as Theme
 
 Rectangle {
 	id: baseWidget
@@ -46,7 +47,7 @@ Rectangle {
 		id: boxTitle
 		z: 1
 		height: 80
-		color: "#1b5e20"
+		color: Theme.headerBackground
 		enabled: true
 		border.width: 0
 		opacity: 1
@@ -61,7 +62,7 @@ Rectangle {
 			id: textTitle
 			width: 166
 			height: 29
-			color: "#ffffff"
+			color: Theme.headerColor
 			text: qsTr("Humble Crap")
 			anchors.top: parent.top
 			anchors.topMargin: 8
@@ -79,7 +80,7 @@ Rectangle {
 			x: 0
 			width: 275
 			height: 14
-			color: "#ffffff"
+			color: Theme.headerColor
 			text: qsTr("Humble Bundle Content Retrieving Application")
 			anchors.top: textTitle.bottom
 			anchors.topMargin: -8
@@ -105,7 +106,7 @@ Rectangle {
 		Rectangle {
 			id: boxMenu
 			height: 24
-			color: "#4c8c4a"
+			color: Theme.menuBackground
 			anchors.left: parent.left
 			anchors.leftMargin: 0
 			anchors.right: parent.right
@@ -232,7 +233,7 @@ Rectangle {
 		id: boxFooter
 		width: 40
 		height: 0
-		color: "#424242"
+		color: Theme.sideBackground
 		anchors.top: boxTitle.bottom
 		anchors.topMargin: 0
 		transformOrigin: Item.Bottom
@@ -298,7 +299,7 @@ Rectangle {
 
 		IconButton {
 			id: buttonSettings
-			text: '*'
+			text: '⚙️'
 			title: 'Setting'
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: parent.top
@@ -336,11 +337,18 @@ Rectangle {
 	/* signal */
 	signal showList;
 	onShowList: {
+
+		var dontcrash = pageMainWindow // The main window must be refer to or it's disappears, crashing the program.
+		if (pageMainWindow === null && typeof pageMainWindow == 'undefined') {
+			console.error('pageMainWindow')
+		}
 		var activeList = pageMainDialog.currentModel()
+		//console.log('onShowList', dontcrash, activeList)
 		if ( activeList )
 		{
-			var data = pageMainWindow.databaseGetListing( page === 'games' ? humbleSystem.platform : page, humbleSystem.bits );
-			//listWorker.sendMessage( {'action': 'updateList', 'model': activeList, 'data': data } )
+			var data = humbleUser.getItems( page === 'games' ? humbleSystem.platform : page, humbleSystem.bits );
+			//console.log('humbleUser.getItems', data.length, pageMainDialog)
+			listWorker.sendMessage( {'action': 'updateList', 'model': activeList, 'data': data } )
 		}
 
 	}
@@ -368,15 +376,22 @@ Rectangle {
 
 	function setActiveList(activeList)
 	{
-		markList(activeList)
-		showList()
+		if ( page !== activeList) {
+			markList(activeList)
+			showList()
+		}
 	}
 
 	function currentModel() {
 		if ( listings[page] ) {
 			return listings[page].list.model;
 		}
-		return;
+		return 0;
 	}
 
 }
+
+/*##^## Designer {
+	D{i:0;autoSize:true;height:480;width:640}
+}
+ ##^##*/

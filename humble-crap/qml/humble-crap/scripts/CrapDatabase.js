@@ -19,13 +19,14 @@
 ****************************************************************************/
 //.pragma library
 
-Qt.include("CrapCode.js")
+// OLD CODE - to be Removed
 
+/*
 var database_connection = null
 var database_name = ".HumbleBundleItems"
 var username = "No@Email"
 
-/* Database Creation SQL */
+// Database Creation SQL
 var query_creation = {
 	orders: 'CREATE TABLE IF NOT EXISTS ORDERS(\
 		"order_id" VARCHAR NOT NULL, \
@@ -60,7 +61,7 @@ var query_creation = {
 	);'
 }
 
-/* Database Queries */
+// Database Queries
 var query_list = {
 	order_replace: 'REPLACE INTO ORDERS (order_id, cache, bundle_name, date, cacheversion) VALUES(?, ?, ?, ?, ?)',
 	download_replace: 'REPLACE INTO DOWNLOADS (download_id, platform, format, machine_name, version, date, torrent, url, sha1, md5, size) VALUES(?, ?, ?,?, ?,?,?, ?, ?,?,?)',
@@ -108,7 +109,6 @@ function getArray(query_name, data) {
 function setUser(user) {
 	username = user
 	database_connection = createDatabase()
-
 }
 
 
@@ -120,6 +120,7 @@ function getDatabase() {
 }
 
 function createDatabase() {
+
 	var db = getDatabase()
 	console.log('Creating Order Database for:', username, 'if needed.')
 	db.transaction(function (tx) {
@@ -127,6 +128,7 @@ function createDatabase() {
 		tx.executeSql(query_creation.products)
 		tx.executeSql(query_creation.downloads)
 	})
+
 	return db
 }
 
@@ -177,3 +179,4 @@ function queueQueryExecute(queryObject) {
 
 	}
 }
+*/

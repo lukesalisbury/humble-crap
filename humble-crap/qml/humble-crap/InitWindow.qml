@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.11
 import QtQuick.Window 2.3
 
 import "dialog"
@@ -28,7 +28,7 @@ Window {
 	}
 
 	Loader {
-        property string messageContent: 'Loading..'
+		property string messageContent: 'Loading..'
 		x: 1
 		y: 1
 		id: pageLoader
@@ -52,10 +52,11 @@ Window {
 	onLoadMainDialog: {
 		var obj = Code.qmlComponent("MainWindow.qml",null,{'visible':true})
 		if ( obj ) {
-            initWindow.close()
-            initWindow.removed = true
-            initConnections.enabled = false
-            delete initWindow
+			initWindow.close()
+			initWindow.removed = true
+			initConnections.enabled = false
+			delete initWindow
+
 		} else {
 			pageLoader.messageContent = 'Failed loading the Main Dialog'
 			//reloadMainWidget.start()
@@ -75,7 +76,7 @@ Window {
 		onOrderError: {
 			console.log('InitWindow', 'onOrderError')
 			if (!removed) {
-                pageLoader.setSource("dialog/LoginDialog.qml")
+				pageLoader.setSource("dialog/LoginDialog.qml")
 			}
 		}
 		onLoginSuccess: {
@@ -97,13 +98,12 @@ Window {
 		 -
 		*/
 		var user = humbleCrap.getUsername()
-
 		// default
 		if (user.length) {
-            pageLoader.messageContent = 'Login as ' + user
+			pageLoader.messageContent = 'Login as ' + user
 			humbleUser.setUser(user)
 		} else {
-            pageLoader.setSource("dialog/LoginDialog.qml")
+			pageLoader.setSource("dialog/LoginDialog.qml")
 		}
 	}
 }

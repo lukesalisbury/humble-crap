@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -17,20 +17,16 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
-import QtQuick 2.0
+import QtQuick 2.11
 import QtGraphicalEffects 1.0
 
+import "../scripts/CrapTheme.js" as Theme
 
 Item {
 	id: container
-	property string text: '🔄'
-	property string databaseIdent: ""
-	property string url: ""
-	property string title: " Unlabeled"
-	property color colour: "#FFFFFF"
-	property color hoverBackground: "#05343a"
-	property color background: "#00acc1"
 
+	property string text: '🔄'
+	property string title: " Unlabeled"
 
 	signal clicked
 
@@ -47,14 +43,20 @@ Item {
 		border.width: 0
 		border.color: "#000000"
 		anchors.fill: parent
-		color: container.background
+		color: Theme.buttonBackground
+
 		Text {
 			id: text1
-			color: container.colour
+
 			text: container.text
+
+			color: Theme.buttonColor
+			font.pixelSize: Theme.buttonIconSize
+			font.family: Theme.buttonFontFamily
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.top: parent.top
+
 			textFormat: Text.PlainText
 			verticalAlignment: Text.AlignVCenter
 			horizontalAlignment: Text.AlignHCenter
@@ -63,14 +65,10 @@ Item {
 
 		MouseArea {
 			id: mousearea1
-			x: 0
-			y: 0
-			anchors.rightMargin: 0
-			anchors.bottomMargin: 0
-			anchors.leftMargin: 0
-			anchors.topMargin: 0
+
 			hoverEnabled: true
 			anchors.fill: parent
+
 			onPressed: container.state = "clicked"
 			onReleased: container.state = ""
 			onClicked: container.clicked()
@@ -78,52 +76,53 @@ Item {
 			onExited: container.state = ""
 		}
 	}
-	DropShadow {
-		width: 20
-		anchors.fill: rectangle1
-		horizontalOffset: 2
-		verticalOffset: 2
-		radius: 2
-		cached: true
-		samples: 8
-		color: "#80000000"
-		source: rectangle1
-	}
 
 	Rectangle {
-		id: rectangle
+		id: rectangle2
 		x: 24
 		y: 0
 		width: 64
 		height: 24
-		color: container.hoverBackground
+		color: Theme.buttonBackground
 		opacity: 0
 
 		Text {
 			id: text2
-			color: container.colour
+
 			text: container.title
 			anchors.verticalCenter: parent.verticalCenter
-			font.pixelSize: 12
-			opacity: 0
-							anchors.bottomMargin: 6
-				anchors.topMargin: 0
-				horizontalAlignment: Text.AlignLeft
-				verticalAlignment: Text.AlignVCenter
-				anchors.leftMargin: 0
+			color: Theme.buttonColor
+			font.pointSize: Theme.buttonFontPointSize
+			font.family: Theme.buttonFontFamily
+			opacity: 1
+			anchors.bottomMargin: 6
+			anchors.topMargin: 0
+			horizontalAlignment: Text.AlignLeft
+			verticalAlignment: Text.AlignVCenter
+			anchors.leftMargin: 0
 		}
 	}
 
 	states: [
 		State {
 			name: "clicked"
-
+			PropertyChanges {
+				target: container
+			}
 			PropertyChanges {
 				target: rectangle1
 				anchors.rightMargin: -1
 				anchors.bottomMargin: -1
 				anchors.leftMargin: 1
 				anchors.topMargin: 1
+				color: Theme.buttonActiveBackground
+			}
+			PropertyChanges {
+				target: rectangle2
+				color: Theme.buttonActiveBackground
+				opacity: 1
+				x: 25
+				y: 1
 			}
 		},
 		State {
@@ -131,19 +130,20 @@ Item {
 
 			PropertyChanges {
 				target: rectangle1
-				color: container.hoverBackground
+				color: Theme.buttonHoverBackground
 			}
 
 			PropertyChanges {
-				target: rectangle
+				target: rectangle2
+				color: Theme.buttonHoverBackground
 				opacity: 1
 			}
 
 			PropertyChanges {
 				target: text2
-
 				opacity: 1
 			}
 		}
 	]
+
 }

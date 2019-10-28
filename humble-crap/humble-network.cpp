@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -40,10 +40,10 @@ QByteArray gUncompress(const QByteArray &data)
 	char out[CHUNK_SIZE];
 
 	// allocate inflate state
-	strm.zalloc = Z_NULL;
-	strm.zfree = Z_NULL;
-	strm.opaque = Z_NULL;
-	strm.avail_in = data.size();
+	strm.zalloc = nullptr;
+	strm.zfree = nullptr;
+	strm.opaque = nullptr;
+	strm.avail_in = static_cast<uInt>(data.size());
 	strm.next_in = (Bytef*)(data.data());
 
 	ret = inflateInit2(&strm, 15 + 32); // gzip decoding
@@ -62,6 +62,7 @@ QByteArray gUncompress(const QByteArray &data)
 		switch (ret) {
 			case Z_NEED_DICT:
 				ret = Z_DATA_ERROR; // and fall through
+				[[clang::fallthrough]];
 			case Z_DATA_ERROR:
 			case Z_MEM_ERROR:
 				(void)inflateEnd(&strm);
@@ -89,10 +90,10 @@ HumbleNetworkRequest::HumbleNetworkRequest(): sslMissing(0)
 
 	if ( !QSslSocket::supportsSsl() )
 	{
-		qDebug() << "OpenSSL not installed";
 		this->errorMessage = "OpenSSL not installed";
+		qDebug() << this->errorMessage;
 		this->sslMissing = true;
-		emit requestError( this->errorMessage, NULL, 0 );
+		emit requestError( this->errorMessage, nullptr, 0 );
 	}
 
 }
@@ -232,7 +233,7 @@ void HumbleNetworkRequest::sslError(QNetworkReply* pReply, const QList<QSslError
 	for (int i = 0; i < errors.size(); ++i) {
 		qDebug() << "SSL Error:" << errors.at(i).errorString();
 	}
-	emit requestError( this->errorMessage, NULL, 0 );
+	emit requestError( this->errorMessage, nullptr, 0 );
 }
 
 /**
@@ -256,7 +257,7 @@ void HumbleNetworkRequest::finishRequest( QNetworkReply* pReply )
 	{
 		QVariant redirectionTarget = pReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
 		QUrl url = redirectionTarget.toUrl();
-		qint16 code = pReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+		qint16 code = static_cast<qint16>(pReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt());
 
 		QByteArray data = pReply->readAll();
 		if ( pReply->rawHeader("Content-Encoding") == "gzip") {

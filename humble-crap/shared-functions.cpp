@@ -24,3 +24,5 @@ bool doesFileExists(QString path) {
 	QFileInfo check_file(path);
 	return (check_file.exists() && check_file.isFile());
 }
+
+

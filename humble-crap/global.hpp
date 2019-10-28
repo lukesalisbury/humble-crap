@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -26,7 +26,7 @@
 #define HUMBLEURL_COOKIE "https://www.humblebundle.com/"
 #define HUMBLEURL_CAPTCHA "https://www.humblebundle.com/user/captcha"
 #define HUMBLEURL_LOGIN "https://www.humblebundle.com/login?ajax=true"
-#define HUMBLEURL_ORDER "https://www.humblebundle.com/api/v1/user/order/"
+#define HUMBLEURL_ORDER "https://www.humblebundle.com/api/v1/order/"
 
 #define HUMBLEURL_TROVE "https://www.humblebundle.com/monthy/trove"
 #define HUMBLEURL_TROVEDOWNLOAD "https://dl.humble.com/" //{filename}?key={key}&ttl={ttl}&t={token}"

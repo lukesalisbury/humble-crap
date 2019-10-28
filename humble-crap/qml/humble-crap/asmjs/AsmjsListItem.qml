@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -17,11 +17,11 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
-import QtQuick 2.0
-import Crap.Humble.Package 1.0
+import QtQuick 2.11
+
 
 import "../widget"
-import "../scripts/CrapDatabase.js" as CrapDatabase
+
 
 Item {
 	height: 62
@@ -52,7 +52,8 @@ Item {
 
 
 	onUpdateStatus: {
-		database_info = CrapDatabase.getInfo(dbIdent, dbFormat, pageMainWindow.page)
+		database_info =  humbleUser.getItem(dbIdent)
+		//database_info = CrapDatabase.getInfo(dbIdent, dbFormat, pageMainWindow.page)
 	}
 
 
@@ -126,12 +127,12 @@ Item {
 			anchors.rightMargin: 4
 			text: "Info"
 			onClicked: {
-				database_info = CrapDatabase.getInfo(parent.ident, parent.format, pageMainWindow.page)
+				database_info =  humbleUser.getItem(dbIdent)
 				Qt.createComponent("AsmjsDialog.qml").createObject( pageMainWindow, { info: database_info, item: parent.parent })
 			}
 		}
 		onClicked: {
-			database_info = CrapDatabase.getInfo(ident, format, pageMainWindow.page)
+			database_info =  humbleUser.getItem(dbIdent)
 			Qt.createComponent("AsmjsDialog.qml").createObject( pageMainWindow, { info: database_info, item: parent })
 		}
 	}

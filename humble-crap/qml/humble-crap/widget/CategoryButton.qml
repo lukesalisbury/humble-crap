@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -17,53 +17,62 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
-import QtQuick 2.0
-import QtGraphicalEffects 1.0
+import QtQuick 2.11
 
+import "../scripts/CrapTheme.js" as Theme
 
 Rectangle {
-    id: button
-    width: 120
-    height: 24
-    color: "#00000000"
-    radius: 0
-    clip: false
-    border.width: 0
+	id: button
+	width: 120
+	height: 24
 
-    property alias name: textName.text
-    property string action: "Windows"
+	radius: 0
+	clip: true
+	border.width: 0
+
+	color: defaultBackground
+
+	/* Property */
+	property alias name: textName.text
+	property string action: "Windows"
 	property bool active: false
 
-    signal clicked
+	property string defaultBackground: Theme.menuBackground
+	property string defaultColor: Theme.menuColor
 
-    MouseArea {
-        id: mouseArea1
+	property string hoverBackground: Theme.Primary2
+	property string hoverColor: Theme.menuColor
 
-        anchors.fill: parent
-        hoverEnabled: true
-        onClicked: button.clicked()
-        onEntered: {
-			parent.state = button.active ? 'hover active' : 'hover'
-        }
-        onExited: {
-			parent.state = button.active ? 'active' : ' '
-        }
+	property string activeBackground: Theme.menuBackground
+	property string activeBorder: Theme.Primary2
+	property string activeColor: Theme.menuColor
 
-        Text {
-            id: textName
-            color: "#ffffff"
-            text: "Windows"
-            font.bold: true
-            font.pointSize: 10
-            anchors.horizontalCenter: parent.horizontalCenter
+
+	/*Signals */
+	signal clicked
+
+	/* Widget */
+	MouseArea {
+		id: mouseArea
+
+		anchors.fill: parent
+		hoverEnabled: true
+
+		Text {
+			id: textName
+			color: button.defaultColor
+			text: "ACTION"
+			font.bold: true
+			font.pointSize: 10
+			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.verticalCenter: parent.verticalCenter
 			horizontalAlignment: Text.AlignHCenter
 		}
 
 		Rectangle {
 			id: boxBorder
-			height: 2
-			color: "#1e1e1e"
+			height: 4
+			color: button.hoverBackground
 			anchors.right: parent.right
 			anchors.rightMargin: 0
 			anchors.left: parent.left
@@ -71,36 +80,76 @@ Rectangle {
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: 0
 			opacity: 0
+			z: 1
 		}
+
+		/* MouseArea Signals */
+		onClicked: button.clicked()
+		onEntered: parent.state = button.active ? 'hoveractive' : 'hover'
+		onExited: parent.state = button.active ? 'active' : ' '
 	}
+
+	/* Signals */
+	onActiveChanged: {
+		button.state = button.active ? 'active' : ' '
+	}
+
+	/* States */
 	states: [
 		State {
+			name: "hoveractive"
+			PropertyChanges {
+				target: textName
+				font.bold: true
+				color: button.activeColor
+			}
+			PropertyChanges {
+				target: boxBorder
+				color: button.defaultBackground
+				opacity: 1
+			}
+			PropertyChanges {
+				target: button
+				color: button.hoverBackground
+			}
+
+
+		},
+		State {
 			name: "hover"
-            PropertyChanges {
-                target: textName
-                font.bold: true
+			PropertyChanges {
+				target: textName
+				color: button.hoverColor
+				font.bold: true
 			}
-
 			PropertyChanges {
 				target: boxBorder
-				color: "#ffffff"
-				opacity: 1
+				color: button.hoverBackground
+				opacity: 0
 			}
-        },
-        State {
-            name: "active"
-            PropertyChanges {
-                target: textName
-                font.bold: true
+			PropertyChanges {
+				target: button
+				color: hoverBackground
 			}
-
+		},
+		State {
+			name: "active"
+			PropertyChanges {
+				target: textName
+				color: button.activeColor
+				font.bold: true
+			}
 			PropertyChanges {
 				target: boxBorder
-				color: "#003300"
+				color: button.activeBorder
 				opacity: 1
+			}
+			PropertyChanges {
+				target: button
+				color: button.activeBackground
 			}
 		}
-    ]
+	]
 
 	Transition {
 		from: " "
@@ -142,4 +191,5 @@ Rectangle {
 			duration: 200
 		}
 	}
+
 }

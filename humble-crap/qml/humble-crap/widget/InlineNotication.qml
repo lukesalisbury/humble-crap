@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright © 2015 Luke Salisbury
+* Copyright © Luke Salisbury
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -17,7 +17,7 @@
 *    misrepresented as being the original software.
 * 3. This notice may not be removed or altered from any source distribution.
 ****************************************************************************/
-import QtQuick 2.0
+import QtQuick 2.11
 
 Rectangle {
 	id: rectangleNotication
@@ -29,12 +29,13 @@ Rectangle {
 	anchors.right: parent.right
 	anchors.left: parent.left
 
-	property alias message: textMessage.text
+	property string message: "Default Message"
 	property int total: 0
 	property int count: 0
 
 	signal successful(string content)
 	signal error(string message)
+	signal refresh
 
 	Text {
 		id: textMessage
@@ -64,11 +65,8 @@ Rectangle {
 		anchors.bottomMargin: 0
 	}
 
-	onTotalChanged: {
-		progressRectangle.width = total > 0 ? (rectangleNotication.width * (count/total)) : 5
-	}
-
-	onCountChanged: {
+	onRefresh: {
+		textMessage.text = message + " " + count + '/' + total
 		progressRectangle.width = total > 0 ? (rectangleNotication.width * (count/total)) : 5
 	}
 
